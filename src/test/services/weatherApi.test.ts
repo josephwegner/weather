@@ -242,7 +242,7 @@ describe('Weather API Service', () => {
 
       expect(result).toHaveLength(24)
       expect(result[0]).toEqual({
-        timestamp: 1641103200, // Jan 2 00:00:00 (2022-01-02T00:00:00)
+        timestamp: 1641081600, // Jan 2 00:00:00 UTC (2022-01-02T00:00:00Z)
         temperature: 65,
         feelsLike: 68,
         humidity: 70,
@@ -325,7 +325,7 @@ describe('Weather API Service', () => {
       expect(result).toHaveLength(24)
 
       // First hour should be midnight of Jan 2
-      expect(result[0].timestamp).toBe(1641103200) // Jan 2 00:00:00 (2022-01-02T00:00:00)
+      expect(result[0].timestamp).toBe(1641081600) // Jan 2 00:00:00 UTC (2022-01-02T00:00:00Z)
     })
   })
 

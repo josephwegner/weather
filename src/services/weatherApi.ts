@@ -125,7 +125,7 @@ export class WeatherApiService {
       const scenario = getMockScenario(scenarioId)
       if (scenario) {
         this.log('Returning mock hourly forecast for day:', scenarioId)
-        // Generate 24 hours of mock data for the requested date
+        // Generate 24 hours of mock data for the requested date (UTC)
         const targetDateMs = new Date(date + 'T00:00:00Z').getTime()
         const baseTimestamp = Math.floor(targetDateMs / 1000)
 
@@ -171,8 +171,8 @@ export class WeatherApiService {
     }
 
     const hourlyDataForDay: HourlyForecast[] = dayData.hours.map((hour: any): HourlyForecast => {
-      // Combine date and time to create full timestamp
-      const dateTimeString = `${date}T${hour.datetime}`
+      // Combine date and time to create full timestamp (force UTC interpretation)
+      const dateTimeString = `${date}T${hour.datetime}Z`
       const timestamp = Math.floor(new Date(dateTimeString).getTime() / 1000)
 
       return {

@@ -65,7 +65,7 @@ jobs:
         run: npm audit --audit-level moderate --json > audit-results.json || true
 
       - name: Upload audit results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-audit
