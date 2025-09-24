@@ -34,7 +34,6 @@ Based on your requirements and the Dark Sky UI inspiration you've shown, here's 
 - Excellent for responsive design patterns
 - Easy to implement Dark Sky's clean, minimal aesthetic
 
-
 ## Feature Implementation Strategy
 
 ### **1. Core Weather Data Architecture**
@@ -65,7 +64,6 @@ const weatherState = {
 }
 ```
 
-
 ### **2. UI Component Breakdown**
 
 **Primary View Components**:
@@ -82,7 +80,6 @@ const weatherState = {
 - `SettingsPanel`: Units, refresh intervals, data sources
 - `MetricsToggle`: Switch between temperature, precipitation, wind, UV, etc.
 
-
 ### **3. Offline Strategy \& Caching**
 
 **Service Worker Caching Strategy**:
@@ -97,7 +94,7 @@ const weatherState = {
 // IndexedDB structure for offline support
 const weatherDB = {
   locations: [], // Saved locations with last update time
-  forecasts: [], // Cached forecast data with timestamps  
+  forecasts: [], // Cached forecast data with timestamps
   radarCache: [], // Recent radar image tiles
   userPreferences: {} // Settings, units, favorite locations
 }
@@ -108,7 +105,6 @@ const weatherDB = {
 - Show cached data immediately with "Last updated" timestamps[^18][^19]
 - Queue location searches for when online[^19][^18]
 - Graceful degradation: disable radar when offline, keep forecasts
-
 
 ### **4. PWA Configuration**
 
@@ -129,7 +125,6 @@ const weatherDB = {
 }
 ```
 
-
 ## Development Phases
 
 ### **Phase 1: Core Weather Data (Week 1-2)**
@@ -139,14 +134,12 @@ const weatherDB = {
 - Build basic weather data fetching and state management
 - Create responsive layout foundation
 
-
 ### **Phase 2: Essential UI Components (Week 2-3)**
 
 - Develop current weather display
 - Build hourly forecast with vertical scrolling
 - Implement precipitation timeline chart
 - Add location search and geolocation
-
 
 ### **Phase 3: Advanced Features (Week 3-4)**
 
@@ -155,14 +148,12 @@ const weatherDB = {
 - Implement daily forecast accordion
 - Add weather metrics tabbing (temp/precip/wind/UV)
 
-
 ### **Phase 4: PWA \& Polish (Week 4-5)**
 
 - Implement service worker with caching strategies
 - Add IndexedDB for offline data storage
 - Configure PWA manifest and installation prompts
 - Performance optimization and error handling
-
 
 ## Technical Considerations for Personal Use
 
@@ -173,7 +164,6 @@ const weatherDB = {
 - **Direct API Integration**: No backend required, APIs called directly from frontend
 - **Local-First Design**: IndexedDB as primary data store with API as sync source
 
-
 ### **Development Shortcuts**
 
 - **Hardcoded Sensible Defaults**: Chicago coordinates, Fahrenheit units, 12-hour time
@@ -181,14 +171,12 @@ const weatherDB = {
 - **Minimal Testing**: Manual testing focus since it's personal use
 - **Rapid Iteration**: Vite's HMR allows immediate feedback during development
 
-
 ### **Performance Optimizations**
 
 - **Lazy Loading**: Radar component loads only when requested
 - **Request Debouncing**: Limit API calls during rapid location searches
 - **Image Optimization**: WebP radar tiles with fallbacks
 - **Bundle Splitting**: Separate chunks for maps and core app
-
 
 ## Deployment Strategy
 
@@ -303,4 +291,3 @@ The vertical scrolling UI, precipitation charts, and radar integration will clos
 [^42]: https://blog.logrocket.com/offline-storage-for-pwas/
 
 [^43]: https://stackoverflow.com/questions/67520627/create-react-app-pwa-change-caching-strategy-of-service-worker
-

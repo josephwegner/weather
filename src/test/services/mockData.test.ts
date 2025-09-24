@@ -56,7 +56,9 @@ describe('Mock Data Service', () => {
 
       expect(scenario.currentWeather.windSpeed).toBeGreaterThan(70)
       expect(scenario.currentWeather.pressure).toBeLessThan(1000)
-      expect(scenario.hourlyForecast.every(hour => hour.precipitationProbability === 100)).toBe(true)
+      expect(scenario.hourlyForecast.every((hour) => hour.precipitationProbability === 100)).toBe(
+        true
+      )
     })
 
     it('missing-data has incomplete fields', () => {
@@ -65,7 +67,7 @@ describe('Mock Data Service', () => {
       expect(scenario.currentWeather.pressure).toBe(0)
       expect(scenario.currentWeather.visibility).toBe(0)
       expect(scenario.currentWeather.icon).toBe('')
-      expect(scenario.hourlyForecast.some(hour => hour.description === '')).toBe(true)
+      expect(scenario.hourlyForecast.some((hour) => hour.description === '')).toBe(true)
     })
   })
 })

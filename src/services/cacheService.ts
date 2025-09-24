@@ -44,7 +44,6 @@ class CacheService {
     return entry.data
   }
 
-
   setDailyForecast(location: Location, data: DailyForecast[]): void {
     const key = this.getCacheKey(location)
     this.dailyForecastCache.set(key, {
@@ -99,15 +98,15 @@ class CacheService {
     return {
       currentWeather: {
         total: currentWeatherEntries.length,
-        fresh: currentWeatherEntries.filter(entry => !this.isExpired(entry)).length
+        fresh: currentWeatherEntries.filter((entry) => !this.isExpired(entry)).length
       },
       dailyForecast: {
         total: dailyForecastEntries.length,
-        fresh: dailyForecastEntries.filter(entry => !this.isExpired(entry)).length
+        fresh: dailyForecastEntries.filter((entry) => !this.isExpired(entry)).length
       },
       hourlyForecastByDate: {
         total: hourlyForecastByDateEntries.length,
-        fresh: hourlyForecastByDateEntries.filter(entry => !this.isExpired(entry)).length
+        fresh: hourlyForecastByDateEntries.filter((entry) => !this.isExpired(entry)).length
       }
     }
   }

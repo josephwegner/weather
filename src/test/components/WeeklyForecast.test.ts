@@ -119,10 +119,12 @@ describe('WeeklyForecast Component', () => {
   })
 
   it('formats precipitation probability correctly', () => {
-    mockStore.dailyForecast = [{
-      ...sampleDailyForecast[0],
-      precipitationProbability: 75
-    }]
+    mockStore.dailyForecast = [
+      {
+        ...sampleDailyForecast[0],
+        precipitationProbability: 75
+      }
+    ]
 
     const wrapper = mount(WeeklyForecast)
 

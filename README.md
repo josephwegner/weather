@@ -15,21 +15,25 @@ A personal weather Progressive Web App inspired by the Dark Sky interface, built
 ## Quick Start
 
 1. **Clone and install dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Set up environment variables:**
+
    ```bash
    cp .env.example .env
    ```
 
    Edit `.env` and add your Visual Crossing API key:
+
    ```
    VISUAL_CROSSING_API_KEY=your_api_key_here
    ```
 
 3. **Start development server:**
+
    ```bash
    npm run dev:full
    ```
@@ -46,13 +50,16 @@ A personal weather Progressive Web App inspired by the Dark Sky interface, built
 3. Copy your API key to the `.env` file
 
 ### Cost-Efficient Usage
+
 The app uses a lazy-loading strategy to minimize API costs:
+
 - Daily forecasts: Single request for 7-day overview (7 records)
 - Hourly details: On-demand requests when tapping a day (24 records per day)
 
 ## Development Commands
 
 ### Core Development
+
 - `npm run dev` - Start client development server only
 - `npm run dev:server` - Start server only
 - `npm run dev:full` - Start both client and server with hot reload
@@ -61,6 +68,7 @@ The app uses a lazy-loading strategy to minimize API costs:
 - `npm run preview` - Preview production build
 
 ### Code Quality
+
 - `npm run lint` - Run ESLint and auto-fix issues
 - `npm run lint:check` - Check linting without fixing
 - `npm run format` - Format code with Prettier
@@ -68,6 +76,7 @@ The app uses a lazy-loading strategy to minimize API costs:
 - `npm run type-check` - Run TypeScript type checking
 
 ### Testing
+
 - `npm run test` - Run client tests in watch mode
 - `npm run test:ui` - Open Vitest UI for interactive testing
 - `npm run test:all` - Run all tests (client + server) once
@@ -79,6 +88,7 @@ The app uses a lazy-loading strategy to minimize API costs:
 ## Development Features
 
 ### Mock Data & Offline Development
+
 The app includes a comprehensive development system for testing different weather scenarios:
 
 ```javascript
@@ -97,18 +107,22 @@ weatherApi.setDevMode({
 ```
 
 ### Development Modes
+
 - **`production`** - Standard API calls only
 - **`cache-first`** - Use cached data when available (default in dev)
 - **`mock`** - Use predefined mock scenarios
 - **`offline`** - Only use cached data, no API calls
 
 ### Cache System
+
 - Automatically caches API responses for 10 minutes
 - Reduces API calls during development
 - View cache stats with `cacheService.getCacheStats()`
 
 ### Testing Edge Cases
+
 The mock system includes scenarios for:
+
 - Extreme temperatures and weather conditions
 - Missing or incomplete API data
 - Network timeouts and API errors
@@ -117,6 +131,7 @@ The mock system includes scenarios for:
 ## Architecture
 
 ### Client (Frontend)
+
 - **Vue 3** - Frontend framework with Composition API
 - **Vite** - Build tool and dev server
 - **Pinia** - State management
@@ -125,6 +140,7 @@ The mock system includes scenarios for:
 - **Workbox** - Service worker and PWA features
 
 ### Server (Backend)
+
 - **Express** - Node.js web server
 - **TypeScript** - Type-safe server code
 - **CORS** - Cross-origin resource sharing
@@ -154,6 +170,7 @@ server/                 # Express server
 ## Continuous Integration
 
 GitHub Actions automatically run on commits to main:
+
 - Linting and code formatting checks
 - TypeScript type checking
 - Complete test suite (client + server)

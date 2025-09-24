@@ -54,7 +54,10 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 180 + Math.sin(i * 0.2) * 30,
       humidity: 65 + Math.cos(i * 0.4) * 10,
       uvIndex: 3 + Math.sin(i * 0.6) * 2,
-      description: ['partly cloudy', 'sunny', 'cloudy', 'light rain', 'sunny', 'partly cloudy', 'clear sky'][i] || 'partly cloudy',
+      description:
+        ['partly cloudy', 'sunny', 'cloudy', 'light rain', 'sunny', 'partly cloudy', 'clear sky'][
+          i
+        ] || 'partly cloudy',
       icon: ['02d', '01d', '04d', '10d', '01d', '02d', '01d'][i] || '02d'
     }))
   },
@@ -241,7 +244,7 @@ export const mockScenarios: MockScenario[] = [
 ]
 
 export const getMockScenario = (scenarioId: string): MockScenario | null => {
-  return mockScenarios.find(scenario => scenario.id === scenarioId) || null
+  return mockScenarios.find((scenario) => scenario.id === scenarioId) || null
 }
 
 export const getRandomScenario = (): MockScenario => {

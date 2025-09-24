@@ -2,9 +2,7 @@
   <div class="weekly-forecast">
     <h2>7-Day Forecast</h2>
 
-    <div v-if="store.isLoading" class="loading">
-      Loading forecast...
-    </div>
+    <div v-if="store.isLoading" class="loading">Loading forecast...</div>
 
     <div v-else-if="store.error" class="error">
       {{ store.error }}
@@ -26,53 +24,55 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useWeatherStore } from '../stores/weather'
-import DayForecastRow from './DayForecastRow.vue'
+  import { onMounted } from 'vue'
+  import { useWeatherStore } from '../stores/weather'
+  import DayForecastRow from './DayForecastRow.vue'
 
-const store = useWeatherStore()
+  const store = useWeatherStore()
 
-onMounted(() => {
-  store.loadDailyForecast()
-})
+  onMounted(() => {
+    store.loadDailyForecast()
+  })
 </script>
 
 <style scoped>
-.weekly-forecast {
-  padding: 0;
-}
+  .weekly-forecast {
+    padding: 0;
+  }
 
-.weekly-forecast h2 {
-  margin: 0 0 1rem 0;
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: white;
-}
+  .weekly-forecast h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: white;
+  }
 
-.loading, .error, .no-data {
-  padding: 1rem;
-  text-align: center;
-  border-radius: 4px;
-}
+  .loading,
+  .error,
+  .no-data {
+    padding: 1rem;
+    text-align: center;
+    border-radius: 4px;
+  }
 
-.loading {
-  background-color: rgba(148, 163, 184, 0.1);
-  color: rgb(148, 163, 184);
-}
+  .loading {
+    background-color: rgba(148, 163, 184, 0.1);
+    color: rgb(148, 163, 184);
+  }
 
-.error {
-  background-color: rgba(248, 113, 113, 0.1);
-  color: rgb(248, 113, 113);
-}
+  .error {
+    background-color: rgba(248, 113, 113, 0.1);
+    color: rgb(248, 113, 113);
+  }
 
-.no-data {
-  background-color: rgba(148, 163, 184, 0.1);
-  color: rgb(148, 163, 184);
-}
+  .no-data {
+    background-color: rgba(148, 163, 184, 0.1);
+    color: rgb(148, 163, 184);
+  }
 
-.forecast-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+  .forecast-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 </style>

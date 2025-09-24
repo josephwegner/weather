@@ -9,7 +9,7 @@ export const TEST_LOCATIONS = {
 
   NEW_YORK: {
     lat: 40.7128,
-    lng: -74.0060,
+    lng: -74.006,
     name: 'New York, NY'
   } as Location,
 
