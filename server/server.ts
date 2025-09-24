@@ -26,7 +26,7 @@ const weatherService = new WeatherService({
 
 const app = createApp({
   weatherService,
-  staticPath: path.join(__dirname, '../dist'),
+  staticPath: path.join(__dirname, '../../dist'),
   enableCors: true
 })
 
