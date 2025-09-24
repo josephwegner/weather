@@ -129,8 +129,10 @@ describe('DayForecastRow Component', () => {
 
     await wrapper.find('[data-testid="day-row-button"]').trigger('click')
 
-    const hourlyItems = wrapper.findAll('[data-testid="hourly-item"]')
-    expect(hourlyItems.length).toBeGreaterThan(0)
+    // Check that table and rows exist
+    expect(wrapper.find('[data-testid="hourly-table"]').exists()).toBe(true)
+    const hourlyRows = wrapper.findAll('[data-testid="hourly-row"]')
+    expect(hourlyRows.length).toBeGreaterThan(0)
     expect(wrapper.text()).toContain('60°') // First hour temperature
   })
 
@@ -200,5 +202,32 @@ describe('DayForecastRow Component', () => {
 
     const button = wrapper.find('[data-testid="day-row-button"]')
     expect(button.attributes('aria-expanded')).toBe('true')
+  })
+
+  it('displays hourly forecast as table with correct structure', async () => {
+    mockStore.hourlyForecastByDate = {
+      '2022-01-01': sampleHourlyForecast.slice(0, 3) // First 3 hours
+    }
+
+    const wrapper = mount(DayForecastRow, {
+      props: { dayForecast: sampleDayForecast }
+    })
+
+    await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+    // Check table structure
+    const table = wrapper.find('[data-testid="hourly-table"]')
+    expect(table.exists()).toBe(true)
+
+    // Check data rows
+    const rows = table.findAll('[data-testid="hourly-row"]')
+    expect(rows).toHaveLength(3)
+
+    // Check first row content (time, weather icon, temperature, precipitation)
+    const firstRowCells = rows[0].findAll('td')
+    expect(firstRowCells).toHaveLength(4)
+    expect(firstRowCells[0].text()).toMatch(/\d{1,2}\s?(AM|PM)/i) // Time format
+    expect(firstRowCells[2].text()).toContain('60°') // Temperature
+    expect(firstRowCells[3].text()).toContain('10%') // Precipitation
   })
 })

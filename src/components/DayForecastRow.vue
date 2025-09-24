@@ -43,22 +43,23 @@
       </div>
 
       <div v-else-if="hourlyData" class="hourly-forecast">
-        <h4>Hourly Forecast</h4>
-        <div class="hourly-grid">
-          <div
-            v-for="hour in hourlyData"
-            :key="hour.timestamp"
-            class="hour-item"
-            data-testid="hourly-item"
-          >
-            <div class="hour-time">{{ formatHour(hour.timestamp) }}</div>
-            <div class="hour-icon">
-              <img :src="getHourlyIconUrl(hour.icon)" :alt="hour.description" />
-            </div>
-            <div class="hour-temp">{{ Math.round(hour.temperature) }}°</div>
-            <div class="hour-precip">{{ hour.precipitationProbability }}%</div>
-          </div>
-        </div>
+        <table class="hourly-table" data-testid="hourly-table">
+          <tbody>
+            <tr
+              v-for="hour in hourlyData"
+              :key="hour.timestamp"
+              class="hourly-row"
+              data-testid="hourly-row"
+            >
+              <td class="hour-time">{{ formatHour(hour.timestamp) }}</td>
+              <td class="hour-weather">
+                <img :src="getHourlyIconUrl(hour.icon)" :alt="hour.description" />
+              </td>
+              <td class="hour-temp">{{ Math.round(hour.temperature) }}°</td>
+              <td class="hour-precip">{{ hour.precipitationProbability }}%</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div v-else class="no-hourly-data">No hourly data available for this day</div>
@@ -130,7 +131,8 @@
     const date = new Date(timestamp * 1000)
     return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
-      hour12: true
+      hour12: true,
+      timeZone: 'UTC'
     })
   }
 
@@ -264,45 +266,61 @@
     font-size: 1rem;
   }
 
-  .hourly-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 1rem;
-    max-height: 200px;
-    overflow-y: auto;
-  }
-
-  .hour-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0.5rem;
+  .hourly-table {
+    width: 100%;
+    border-collapse: collapse;
     background: rgb(51, 65, 85);
     border-radius: 4px;
-    border: 1px solid rgb(71, 85, 105);
+    overflow: hidden;
+    max-height: 300px;
+    display: block;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .hourly-table::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hourly-table tbody {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .hourly-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgb(71, 85, 105);
+    vertical-align: middle;
+  }
+
+  .hourly-row:hover {
+    background: rgba(71, 85, 105, 0.3);
   }
 
   .hour-time {
-    font-size: 0.8rem;
-    color: rgb(148, 163, 184);
-    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    color: white;
+    font-weight: 500;
   }
 
-  .hour-icon img {
+  .hour-weather img {
     width: 24px;
     height: 24px;
+    vertical-align: middle;
   }
 
   .hour-temp {
     font-weight: 600;
     font-size: 0.9rem;
     color: white;
-    margin: 0.25rem 0;
   }
 
   .hour-precip {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: #4a90e2;
+    font-weight: 500;
   }
 
   .no-hourly-data {
@@ -323,9 +341,15 @@
       justify-content: space-between;
     }
 
-    .hourly-grid {
-      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-      gap: 0.5rem;
+    .hourly-table th,
+    .hourly-table td {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .hour-weather img {
+      width: 20px;
+      height: 20px;
     }
   }
 </style>
