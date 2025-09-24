@@ -6,8 +6,8 @@ A personal weather Progressive Web App inspired by the Dark Sky interface, built
 
 - Clean, minimalist interface inspired by Dark Sky
 - Current weather conditions
-- 48-hour hourly forecast
-- 10-day daily forecast
+- 7-day hourly forecast (lazy-loaded by day)
+- 7-day daily forecast
 - Interactive radar maps
 - Progressive Web App (PWA) with offline support
 - Responsive design optimized for mobile
@@ -24,9 +24,9 @@ A personal weather Progressive Web App inspired by the Dark Sky interface, built
    cp .env.example .env
    ```
 
-   Edit `.env` and add your OpenWeatherMap API key:
+   Edit `.env` and add your Visual Crossing API key:
    ```
-   VITE_OPENWEATHER_API_KEY=your_api_key_here
+   VITE_VISUAL_CROSSING_API_KEY=your_api_key_here
    ```
 
 3. **Start development server:**
@@ -41,9 +41,14 @@ A personal weather Progressive Web App inspired by the Dark Sky interface, built
 
 ## Getting an API Key
 
-1. Sign up at [OpenWeatherMap](https://openweathermap.org/api)
-2. Choose the "One Call API 3.0" (free tier includes 1,000 calls/day)
+1. Sign up at [Visual Crossing Weather API](https://www.visualcrossing.com/weather-api)
+2. Choose the free tier (1,000 records/day)
 3. Copy your API key to the `.env` file
+
+### Cost-Efficient Usage
+The app uses a lazy-loading strategy to minimize API costs:
+- Daily forecasts: Single request for 7-day overview (7 records)
+- Hourly details: On-demand requests when tapping a day (24 records per day)
 
 ## Development Commands
 
@@ -118,7 +123,7 @@ src/
 ├── components/     # Vue components
 ├── stores/         # Pinia stores (weather state management)
 ├── services/       # API services and caching
-│   ├── weatherApi.ts    # OpenWeatherMap API client
+│   ├── weatherApi.ts    # Visual Crossing API client
 │   ├── cacheService.ts  # Response caching
 │   └── mockData.ts      # Development mock scenarios
 ├── types/          # TypeScript type definitions

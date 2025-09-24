@@ -3,8 +3,8 @@ import type { Location, CurrentWeather, HourlyForecast, DailyForecast } from '..
 import { cacheService } from './cacheService'
 import { getMockScenario, mockScenarios } from './mockData'
 
-const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || ''
-const OPENWEATHER_BASE_URL = 'https://api.openweathermap.org/data/3.0/onecall'
+const VISUAL_CROSSING_API_KEY = import.meta.env.VITE_VISUAL_CROSSING_API_KEY || ''
+const VISUAL_CROSSING_BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline'
 
 export type DevMode = 'production' | 'cache-first' | 'mock' | 'offline'
 
@@ -36,6 +36,25 @@ export class WeatherApiService {
     if (this.devConfig.enableLogging) {
       console.log('[WeatherAPI]', ...args)
     }
+  }
+
+  private mapVisualCrossingIcon(vcIcon: string): string {
+    // Map Visual Crossing icons to OpenWeatherMap-compatible icons
+    const iconMap: Record<string, string> = {
+      'clear-day': '01d',
+      'clear-night': '01n',
+      'partly-cloudy-day': '02d',
+      'partly-cloudy-night': '02n',
+      'cloudy': '04d',
+      'fog': '50d',
+      'wind': '50d',
+      'rain': '10d',
+      'sleet': '13d',
+      'snow': '13d',
+      'hail': '13d',
+      'thunderstorm': '11d'
+    }
+    return iconMap[vcIcon] || '01d'
   }
 
   async getCurrentWeather(location: Location): Promise<CurrentWeather> {
@@ -71,34 +90,34 @@ export class WeatherApiService {
     }
 
     // Make API call
-    if (!OPENWEATHER_API_KEY) {
-      throw new Error('OpenWeatherMap API key not configured')
+    if (!VISUAL_CROSSING_API_KEY) {
+      throw new Error('Visual Crossing API key not configured')
     }
 
-    this.log('Making API call to OpenWeatherMap')
-    const response = await axios.get(OPENWEATHER_BASE_URL, {
+    this.log('Making API call to Visual Crossing')
+    const locationString = `${location.lat},${location.lng}`
+    const response = await axios.get(`${VISUAL_CROSSING_BASE_URL}/${locationString}/today`, {
       params: {
-        lat: location.lat,
-        lon: location.lng,
-        appid: OPENWEATHER_API_KEY,
-        units: 'imperial',
-        exclude: 'minutely,alerts'
+        key: VISUAL_CROSSING_API_KEY,
+        unitGroup: 'us',
+        include: 'current',
+        contentType: 'json'
       }
     })
 
-    const current = response.data.current
+    const currentConditions = response.data.currentConditions
     const weatherData: CurrentWeather = {
-      temperature: Math.round(current.temp),
-      feelsLike: Math.round(current.feels_like),
-      humidity: current.humidity,
-      pressure: current.pressure,
-      windSpeed: Math.round(current.wind_speed),
-      windDirection: current.wind_deg,
-      visibility: Math.round(current.visibility / 1000),
-      uvIndex: current.uvi,
-      description: current.weather[0].description,
-      icon: current.weather[0].icon,
-      timestamp: current.dt
+      temperature: Math.round(currentConditions.temp),
+      feelsLike: Math.round(currentConditions.feelslike),
+      humidity: currentConditions.humidity,
+      pressure: Math.round(currentConditions.pressure),
+      windSpeed: Math.round(currentConditions.windspeed),
+      windDirection: currentConditions.winddir,
+      visibility: Math.round(currentConditions.visibility),
+      uvIndex: currentConditions.uvindex || 0,
+      description: currentConditions.conditions.toLowerCase(),
+      icon: this.mapVisualCrossingIcon(currentConditions.icon),
+      timestamp: Math.floor(new Date(currentConditions.datetime).getTime() / 1000)
     }
 
     // Cache the result
@@ -152,53 +171,45 @@ export class WeatherApiService {
     }
 
     // Make API call
-    if (!OPENWEATHER_API_KEY) {
-      throw new Error('OpenWeatherMap API key not configured')
+    if (!VISUAL_CROSSING_API_KEY) {
+      throw new Error('Visual Crossing API key not configured')
     }
 
     this.log('Making API call for hourly forecast for day:', date)
-    const response = await axios.get(OPENWEATHER_BASE_URL, {
+    const locationString = `${location.lat},${location.lng}`
+    const response = await axios.get(`${VISUAL_CROSSING_BASE_URL}/${locationString}/${date}`, {
       params: {
-        lat: location.lat,
-        lon: location.lng,
-        appid: OPENWEATHER_API_KEY,
-        units: 'imperial',
-        exclude: 'current,minutely,daily,alerts'
+        key: VISUAL_CROSSING_API_KEY,
+        unitGroup: 'us',
+        include: 'hours',
+        contentType: 'json'
       }
     })
 
-    // Filter to only include hours for the requested date in the location's local timezone
-    // OpenWeatherMap API returns timestamps in UTC, but we want to filter by local date
-    const targetDate = new Date(date + 'T00:00:00')
-    const localMidnight = targetDate.getTime()
-    const localNextMidnight = localMidnight + 86400000 // +24 hours
+    // Visual Crossing returns a single day with hours array
+    const dayData = response.data.days[0]
+    if (!dayData || !dayData.hours) {
+      return []
+    }
 
-    // Get timezone offset for the target date (in minutes)
-    const timezoneOffsetMs = targetDate.getTimezoneOffset() * 60000
+    const hourlyDataForDay: HourlyForecast[] = dayData.hours.map((hour: any): HourlyForecast => {
+      // Combine date and time to create full timestamp
+      const dateTimeString = `${date}T${hour.datetime}`
+      const timestamp = Math.floor(new Date(dateTimeString).getTime() / 1000)
 
-    // Convert local midnight times to UTC for comparison with API timestamps
-    const utcMidnightMs = localMidnight + timezoneOffsetMs
-    const utcNextMidnightMs = localNextMidnight + timezoneOffsetMs
-
-    const hourlyDataForDay: HourlyForecast[] = response.data.hourly
-      /*.filter((hour: any) => {
-        const hourMs = hour.dt * 1000 // API timestamp in UTC milliseconds
-        return hourMs >= utcMidnightMs && hourMs < utcNextMidnightMs
-      })*/
-      .map((hour: any): HourlyForecast => ({
-        timestamp: hour.dt,
+      return {
+        timestamp,
         temperature: Math.round(hour.temp),
-        feelsLike: Math.round(hour.feels_like),
+        feelsLike: Math.round(hour.feelslike),
         humidity: hour.humidity,
-        precipitationProbability: Math.round((hour.pop || 0) * 100),
-        precipitationIntensity: hour.rain?.['1h'] || hour.snow?.['1h'] || 0,
-        windSpeed: Math.round(hour.wind_speed),
-        windDirection: hour.wind_deg,
-        description: hour.weather[0].description,
-        icon: hour.weather[0].icon
-      }))
-
-    console.log('hourly data for day', hourlyDataForDay, response.data)
+        precipitationProbability: Math.round(hour.precipprob || 0),
+        precipitationIntensity: hour.precip || 0,
+        windSpeed: Math.round(hour.windspeed),
+        windDirection: hour.winddir,
+        description: hour.conditions.toLowerCase(),
+        icon: this.mapVisualCrossingIcon(hour.icon)
+      }
+    })
 
     // Cache the result
     cacheService.setHourlyForecastForDay(location, date, hourlyDataForDay)
@@ -240,34 +251,34 @@ export class WeatherApiService {
     }
 
     // Make API call
-    if (!OPENWEATHER_API_KEY) {
-      throw new Error('OpenWeatherMap API key not configured')
+    if (!VISUAL_CROSSING_API_KEY) {
+      throw new Error('Visual Crossing API key not configured')
     }
 
     this.log('Making API call for daily forecast')
-    const response = await axios.get(OPENWEATHER_BASE_URL, {
+    const locationString = `${location.lat},${location.lng}`
+    const response = await axios.get(`${VISUAL_CROSSING_BASE_URL}/${locationString}/next7days`, {
       params: {
-        lat: location.lat,
-        lon: location.lng,
-        appid: OPENWEATHER_API_KEY,
-        units: 'imperial',
-        exclude: 'current,minutely,hourly,alerts'
+        key: VISUAL_CROSSING_API_KEY,
+        unitGroup: 'us',
+        include: 'days',
+        contentType: 'json'
       }
     })
 
-    const dailyData: DailyForecast[] = response.data.daily.slice(0, 7).map((day: any): DailyForecast => ({
-      date: new Date(day.dt * 1000).toISOString().split('T')[0],
-      timestamp: day.dt,
-      temperatureHigh: Math.round(day.temp.max),
-      temperatureLow: Math.round(day.temp.min),
-      precipitationProbability: Math.round((day.pop || 0) * 100),
-      precipitationIntensity: day.rain?.['1h'] || day.snow?.['1h'] || 0,
-      windSpeed: Math.round(day.wind_speed),
-      windDirection: day.wind_deg,
+    const dailyData: DailyForecast[] = response.data.days.slice(0, 7).map((day: any): DailyForecast => ({
+      date: day.datetime,
+      timestamp: Math.floor(new Date(day.datetime).getTime() / 1000),
+      temperatureHigh: Math.round(day.tempmax),
+      temperatureLow: Math.round(day.tempmin),
+      precipitationProbability: Math.round((day.precipprob || 0)),
+      precipitationIntensity: day.precip || 0,
+      windSpeed: Math.round(day.windspeed),
+      windDirection: day.winddir,
       humidity: day.humidity,
-      uvIndex: day.uvi,
-      description: day.weather[0].description,
-      icon: day.weather[0].icon
+      uvIndex: day.uvindex || 0,
+      description: day.conditions.toLowerCase(),
+      icon: this.mapVisualCrossingIcon(day.icon)
     }))
 
     // Cache the result

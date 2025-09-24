@@ -62,17 +62,18 @@ describe('Weather API Service', () => {
       mockedCache.getCurrentWeather.mockReturnValue(null)
       mockedAxios.get.mockResolvedValue({
         data: {
-          current: {
+          currentConditions: {
             temp: 75,
-            feels_like: 78,
+            feelslike: 78,
             humidity: 60,
             pressure: 1013,
-            wind_speed: 10,
-            wind_deg: 180,
-            visibility: 10000,
-            uvi: 3,
-            weather: [{ description: 'clear sky', icon: '01d' }],
-            dt: 1234567890
+            windspeed: 10,
+            winddir: 180,
+            visibility: 10,
+            uvindex: 3,
+            conditions: 'Clear sky',
+            icon: 'clear-day',
+            datetime: '2022-01-01T12:00:00'
           }
         }
       })
@@ -82,6 +83,8 @@ describe('Weather API Service', () => {
       const result = await weatherApi.getCurrentWeather(testLocation)
 
       expect(result.temperature).toBe(75)
+      expect(result.description).toBe('clear sky')
+      expect(result.icon).toBe('01d')
       expect(mockedAxios.get).toHaveBeenCalledOnce()
       expect(mockedCache.setCurrentWeather).toHaveBeenCalledWith(testLocation, result)
     })
