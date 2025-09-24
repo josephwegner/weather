@@ -19,9 +19,6 @@ export default defineConfig({
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 1 // 1 hour
               },
-              cacheKeyWillBeUsed: async ({ request }) => {
-                return `${request.url}`
-              }
             }
           },
           {
@@ -37,7 +34,6 @@ export default defineConfig({
           }
         ]
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
         name: 'Personal Weather App',
         short_name: 'Weather',
@@ -46,20 +42,7 @@ export default defineConfig({
         background_color: '#0f172a',
         display: 'standalone',
         scope: '/',
-        start_url: '/',
-        icons: [
-          {
-            src: 'icons/icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'icons/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable'
-          }
-        ]
+        start_url: '/'
       }
     })
   ],
