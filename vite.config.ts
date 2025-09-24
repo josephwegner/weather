@@ -18,7 +18,7 @@ export default defineConfig({
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 1 // 1 hour
-              },
+              }
             }
           },
           {
