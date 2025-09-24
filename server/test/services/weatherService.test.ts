@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import axios from 'axios'
 import { WeatherService } from '../../services/weatherService.js'
 
-const mockedAxios = vi.mocked(axios)
+const mockedAxios = vi.mocked(axios, true)
 
 describe('WeatherService', () => {
   let weatherService: WeatherService

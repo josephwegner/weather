@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
 import { WeatherService } from './services/weatherService.js'
 import { createWeatherRoutes } from './routes/weatherRoutes.js'
 

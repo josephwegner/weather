@@ -73,11 +73,11 @@
   "lint-staged": {
     "src/**/*.{ts,vue}": [
       "eslint --fix",
-      "prettier --write"
+      "prettier --check"
     ],
     "server/**/*.ts": [
       "eslint --fix",
-      "prettier --write"
+      "prettier --check"
     ],
     "{src,server}/**/*.{ts,vue}": [
       "bash -c 'npm run test:all'"
