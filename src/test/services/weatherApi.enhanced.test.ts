@@ -7,8 +7,10 @@ import { TEST_LOCATIONS } from '../constants'
 vi.mock('axios')
 vi.mock('../../services/cacheService')
 
-const mockedAxios = vi.mocked(axios)
 const mockedCache = vi.mocked(cacheService)
+
+// Type the axios.get method properly
+const mockedAxiosGet = vi.mocked(axios.get)
 
 describe('Weather API Service - Enhanced Daily/Hourly', () => {
   let weatherApi: WeatherApiService
@@ -38,7 +40,7 @@ describe('Weather API Service - Enhanced Daily/Hourly', () => {
         }
       }
 
-      mockedAxios.get.mockResolvedValue(mockApiResponse)
+      mockedAxiosGet.mockResolvedValue(mockApiResponse)
       mockedCache.getDailyForecast.mockReturnValue(null)
 
       const result = await weatherApi.getDailyForecast(TEST_LOCATIONS.CHICAGO)
@@ -85,7 +87,7 @@ describe('Weather API Service - Enhanced Daily/Hourly', () => {
       const result = await weatherApi.getDailyForecast(TEST_LOCATIONS.CHICAGO)
 
       expect(result).toEqual(cachedForecast)
-      expect(mockedAxios.get).not.toHaveBeenCalled()
+      expect(mockedAxiosGet).not.toHaveBeenCalled()
     })
 
     it('returns mock daily forecast in mock mode', async () => {
@@ -96,7 +98,7 @@ describe('Weather API Service - Enhanced Daily/Hourly', () => {
       expect(result).toHaveLength(7)
       expect(result[0].temperatureHigh).toBeDefined()
       expect(result[0].temperatureLow).toBeDefined()
-      expect(mockedAxios.get).not.toHaveBeenCalled()
+      expect(mockedAxiosGet).not.toHaveBeenCalled()
     })
   })
 
@@ -106,25 +108,27 @@ describe('Weather API Service - Enhanced Daily/Hourly', () => {
     it('fetches hourly forecast for specific day', async () => {
       const mockApiResponse = {
         data: {
-          days: [{
-            datetime: '2022-01-02',
-            hours: Array.from({ length: 24 }, (_, i) => ({
-              datetime: `${i.toString().padStart(2, '0')}:00:00`,
-              temp: 65 + Math.sin(i * 0.3) * 5,
-              feelslike: 68 + Math.sin(i * 0.3) * 5,
-              humidity: 70,
-              precipprob: 20,
-              precip: 0,
-              windspeed: 8,
-              winddir: 180,
-              conditions: 'Partly cloudy',
-              icon: 'partly-cloudy-day'
-            }))
-          }]
+          days: [
+            {
+              datetime: '2022-01-02',
+              hours: Array.from({ length: 24 }, (_, i) => ({
+                datetime: `${i.toString().padStart(2, '0')}:00:00`,
+                temp: 65 + Math.sin(i * 0.3) * 5,
+                feelslike: 68 + Math.sin(i * 0.3) * 5,
+                humidity: 70,
+                precipprob: 20,
+                precip: 0,
+                windspeed: 8,
+                winddir: 180,
+                conditions: 'Partly cloudy',
+                icon: 'partly-cloudy-day'
+              }))
+            }
+          ]
         }
       }
 
-      mockedAxios.get.mockResolvedValue(mockApiResponse)
+      mockedAxiosGet.mockResolvedValue(mockApiResponse)
       mockedCache.getHourlyForecastForDay.mockReturnValue(null)
 
       const result = await weatherApi.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, targetDate)
@@ -142,7 +146,11 @@ describe('Weather API Service - Enhanced Daily/Hourly', () => {
         description: 'partly cloudy',
         icon: '02d'
       })
-      expect(mockedCache.setHourlyForecastForDay).toHaveBeenCalledWith(TEST_LOCATIONS.CHICAGO, targetDate, result)
+      expect(mockedCache.setHourlyForecastForDay).toHaveBeenCalledWith(
+        TEST_LOCATIONS.CHICAGO,
+        targetDate,
+        result
+      )
     })
 
     it('returns cached hourly forecast for day when available', async () => {
@@ -165,7 +173,7 @@ describe('Weather API Service - Enhanced Daily/Hourly', () => {
       const result = await weatherApi.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, targetDate)
 
       expect(result).toEqual(cachedHourly)
-      expect(mockedAxios.get).not.toHaveBeenCalled()
+      expect(mockedAxiosGet).not.toHaveBeenCalled()
     })
 
     it('returns mock hourly forecast for day in mock mode', async () => {
@@ -175,31 +183,33 @@ describe('Weather API Service - Enhanced Daily/Hourly', () => {
 
       expect(result).toHaveLength(24)
       expect(result[0].temperature).toBeGreaterThan(100) // Desert conditions
-      expect(mockedAxios.get).not.toHaveBeenCalled()
+      expect(mockedAxiosGet).not.toHaveBeenCalled()
     })
 
     it('returns only hours for the requested date', async () => {
       const mockApiResponse = {
         data: {
-          days: [{
-            datetime: '2022-01-02',
-            hours: Array.from({ length: 24 }, (_, i) => ({
-              datetime: `${i.toString().padStart(2, '0')}:00:00`,
-              temp: 65,
-              feelslike: 68,
-              humidity: 70,
-              precipprob: 20,
-              precip: 0,
-              windspeed: 8,
-              winddir: 180,
-              conditions: 'Partly cloudy',
-              icon: 'partly-cloudy-day'
-            }))
-          }]
+          days: [
+            {
+              datetime: '2022-01-02',
+              hours: Array.from({ length: 24 }, (_, i) => ({
+                datetime: `${i.toString().padStart(2, '0')}:00:00`,
+                temp: 65,
+                feelslike: 68,
+                humidity: 70,
+                precipprob: 20,
+                precip: 0,
+                windspeed: 8,
+                winddir: 180,
+                conditions: 'Partly cloudy',
+                icon: 'partly-cloudy-day'
+              }))
+            }
+          ]
         }
       }
 
-      mockedAxios.get.mockResolvedValue(mockApiResponse)
+      mockedAxiosGet.mockResolvedValue(mockApiResponse)
       mockedCache.getHourlyForecastForDay.mockReturnValue(null)
 
       const result = await weatherApi.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, '2022-01-02')
@@ -215,7 +225,7 @@ describe('Weather API Service - Enhanced Daily/Hourly', () => {
   describe('Error Handling', () => {
     it('throws error when daily forecast API fails', async () => {
       mockedCache.getDailyForecast.mockReturnValue(null)
-      mockedAxios.get.mockRejectedValue(new Error('API Error'))
+      mockedAxiosGet.mockRejectedValue(new Error('API Error'))
       weatherApi.setDevMode({ mode: 'production' })
 
       await expect(weatherApi.getDailyForecast(TEST_LOCATIONS.CHICAGO)).rejects.toThrow('API Error')
@@ -223,10 +233,12 @@ describe('Weather API Service - Enhanced Daily/Hourly', () => {
 
     it('throws error when hourly forecast for day API fails', async () => {
       mockedCache.getHourlyForecastForDay.mockReturnValue(null)
-      mockedAxios.get.mockRejectedValue(new Error('Network Error'))
+      mockedAxiosGet.mockRejectedValue(new Error('Network Error'))
       weatherApi.setDevMode({ mode: 'production' })
 
-      await expect(weatherApi.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, '2022-01-01')).rejects.toThrow('Network Error')
+      await expect(
+        weatherApi.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, '2022-01-01')
+      ).rejects.toThrow('Network Error')
     })
   })
 })

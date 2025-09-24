@@ -15,8 +15,12 @@
               </div>
               <div v-else class="text-6xl font-thin mb-2">--°</div>
 
-              <div v-if="weatherStore.isLoading" class="text-slate-300">Loading weather data...</div>
-              <div v-else-if="weatherStore.error" class="text-red-400">{{ weatherStore.error }}</div>
+              <div v-if="weatherStore.isLoading" class="text-slate-300">
+                Loading weather data...
+              </div>
+              <div v-else-if="weatherStore.error" class="text-red-400">
+                {{ weatherStore.error }}
+              </div>
               <div v-else-if="weatherStore.currentWeather" class="text-slate-300">
                 {{ weatherStore.currentWeather.description }}
               </div>
@@ -34,33 +38,29 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useWeatherStore } from './stores/weather'
-import { WeatherApiService } from './services/weatherApi'
-import WeeklyForecast from './components/WeeklyForecast.vue'
+  import { onMounted } from 'vue'
+  import { useWeatherStore } from './stores/weather'
+  import { WeatherApiService } from './services/weatherApi'
+  import WeeklyForecast from './components/WeeklyForecast.vue'
 
-const weatherStore = useWeatherStore()
-const weatherApi = new WeatherApiService()
+  const weatherStore = useWeatherStore()
+  const weatherApi = new WeatherApiService()
 
-const formatTime = (timestamp: number) => {
-  return new Date(timestamp * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true })
-}
+  const fetchWeatherData = async () => {
+    try {
+      weatherStore.setLoading(true)
+      weatherStore.setError(null)
 
-const fetchWeatherData = async () => {
-  try {
-    weatherStore.setLoading(true)
-    weatherStore.setError(null)
-
-    const currentWeather = await weatherApi.getCurrentWeather(weatherStore.currentLocation)
-    weatherStore.setCurrentWeather(currentWeather)
-  } catch (error) {
-    weatherStore.setError(error instanceof Error ? error.message : 'Failed to fetch weather data')
-  } finally {
-    weatherStore.setLoading(false)
+      const currentWeather = await weatherApi.getCurrentWeather(weatherStore.currentLocation)
+      weatherStore.setCurrentWeather(currentWeather)
+    } catch (error) {
+      weatherStore.setError(error instanceof Error ? error.message : 'Failed to fetch weather data')
+    } finally {
+      weatherStore.setLoading(false)
+    }
   }
-}
 
-onMounted(() => {
-  fetchWeatherData()
-})
+  onMounted(() => {
+    fetchWeatherData()
+  })
 </script>

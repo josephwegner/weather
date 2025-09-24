@@ -77,7 +77,7 @@ describe('DayForecastRow Component', () => {
     })
 
     expect(wrapper.find('[data-testid="hourly-detail"]').exists()).toBe(false)
-    expect(wrapper.vm.isExpanded).toBe(false)
+    expect(wrapper.find('[data-testid="day-row-button"]').attributes('aria-expanded')).toBe('false')
   })
 
   it('expands when clicked and loads hourly data', async () => {
@@ -87,7 +87,7 @@ describe('DayForecastRow Component', () => {
 
     await wrapper.find('[data-testid="day-row-button"]').trigger('click')
 
-    expect(wrapper.vm.isExpanded).toBe(true)
+    expect(wrapper.find('[data-testid="day-row-button"]').attributes('aria-expanded')).toBe('true')
     expect(mockStore.loadHourlyForecastForDay).toHaveBeenCalledWith('2022-01-01')
   })
 
@@ -98,11 +98,11 @@ describe('DayForecastRow Component', () => {
 
     // Expand first
     await wrapper.find('[data-testid="day-row-button"]').trigger('click')
-    expect(wrapper.vm.isExpanded).toBe(true)
+    expect(wrapper.find('[data-testid="day-row-button"]').attributes('aria-expanded')).toBe('true')
 
     // Then collapse
     await wrapper.find('[data-testid="day-row-button"]').trigger('click')
-    expect(wrapper.vm.isExpanded).toBe(false)
+    expect(wrapper.find('[data-testid="day-row-button"]').attributes('aria-expanded')).toBe('false')
   })
 
   it('shows loading state when fetching hourly data', async () => {

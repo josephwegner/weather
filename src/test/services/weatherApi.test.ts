@@ -11,6 +11,9 @@ vi.mock('../../services/cacheService')
 const mockedAxios = vi.mocked(axios)
 const mockedCache = vi.mocked(cacheService)
 
+// Type the axios.get method properly
+const mockedAxiosGet = vi.mocked(axios.get)
+
 describe('Weather API Service', () => {
   let weatherApi: WeatherApiService
   const testLocation: Location = TEST_LOCATIONS.CHICAGO
@@ -30,7 +33,6 @@ describe('Weather API Service', () => {
       expect(result.description).toBe('partly cloudy')
       expect(mockedAxios.get).not.toHaveBeenCalled()
     })
-
   })
 
   describe('Cache-First Mode', () => {
@@ -60,7 +62,7 @@ describe('Weather API Service', () => {
 
     it('makes API call when cache is empty', async () => {
       mockedCache.getCurrentWeather.mockReturnValue(null)
-      mockedAxios.get.mockResolvedValue({
+      mockedAxiosGet.mockResolvedValue({
         data: {
           currentConditions: {
             temp: 75,
@@ -143,7 +145,7 @@ describe('Weather API Service', () => {
       // This test would require mocking import.meta.env at the module level
       // For now, we'll test API error handling instead
       mockedCache.getCurrentWeather.mockReturnValue(null)
-      mockedAxios.get.mockRejectedValue(new Error('API Error'))
+      mockedAxiosGet.mockRejectedValue(new Error('API Error'))
       weatherApi.setDevMode({ mode: 'production' })
 
       await expect(weatherApi.getCurrentWeather(testLocation)).rejects.toThrow('API Error')
