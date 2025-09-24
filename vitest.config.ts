@@ -8,7 +8,13 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/test/**/*.test.ts']
+    include: ['src/test/**/*.test.ts'],
+    pool: 'forks',
+    environmentOptions: {
+      jsdom: {
+        resources: 'usable'
+      }
+    }
   },
   resolve: {
     alias: {
