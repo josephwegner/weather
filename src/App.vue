@@ -25,16 +25,7 @@
           </div>
 
           <div class="bg-slate-800 rounded-lg p-6">
-            <h3 class="text-lg font-medium mb-4">Hourly Forecast</h3>
-            <div v-if="weatherStore.isLoading" class="text-slate-300">Loading forecast...</div>
-            <div v-else-if="weatherStore.hourlyForecast.length > 0" class="space-y-2">
-              <div v-for="hour in weatherStore.hourlyForecast.slice(0, 8)" :key="hour.timestamp"
-                   class="flex justify-between items-center">
-                <span class="text-sm">{{ formatTime(hour.timestamp) }}</span>
-                <span class="text-sm">{{ hour.temperature }}°</span>
-              </div>
-            </div>
-            <div v-else class="text-slate-300">No forecast data available</div>
+            <WeeklyForecast />
           </div>
         </div>
       </main>
@@ -46,6 +37,7 @@
 import { onMounted } from 'vue'
 import { useWeatherStore } from './stores/weather'
 import { WeatherApiService } from './services/weatherApi'
+import WeeklyForecast from './components/WeeklyForecast.vue'
 
 const weatherStore = useWeatherStore()
 const weatherApi = new WeatherApiService()
@@ -59,13 +51,8 @@ const fetchWeatherData = async () => {
     weatherStore.setLoading(true)
     weatherStore.setError(null)
 
-    const [currentWeather, hourlyForecast] = await Promise.all([
-      weatherApi.getCurrentWeather(weatherStore.currentLocation),
-      weatherApi.getHourlyForecast(weatherStore.currentLocation)
-    ])
-
+    const currentWeather = await weatherApi.getCurrentWeather(weatherStore.currentLocation)
     weatherStore.setCurrentWeather(currentWeather)
-    weatherStore.setHourlyForecast(hourlyForecast)
   } catch (error) {
     weatherStore.setError(error instanceof Error ? error.message : 'Failed to fetch weather data')
   } finally {

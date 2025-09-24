@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useWeatherStore } from '../../stores/weather'
-import type { CurrentWeather, HourlyForecast, Location } from '../../types/weather'
+import type { CurrentWeather, HourlyForecast, DailyForecast, Location } from '../../types/weather'
+import { TEST_LOCATIONS, TEST_WEATHER_DATA } from '../constants'
 
 describe('Weather Store', () => {
   beforeEach(() => {
@@ -11,24 +12,18 @@ describe('Weather Store', () => {
   it('initializes with default Chicago location', () => {
     const store = useWeatherStore()
 
-    expect(store.currentLocation).toEqual({
-      lat: 41.8781,
-      lng: -87.6298,
-      name: 'Chicago, IL'
-    })
+    expect(store.currentLocation).toEqual(TEST_LOCATIONS.CHICAGO)
     expect(store.currentWeather).toBeNull()
     expect(store.hourlyForecast).toEqual([])
+    expect(store.dailyForecast).toEqual([])
+    expect(store.hourlyForecastByDate).toEqual({})
     expect(store.isLoading).toBe(false)
     expect(store.error).toBeNull()
   })
 
   it('sets location correctly', () => {
     const store = useWeatherStore()
-    const newLocation: Location = {
-      lat: 40.7128,
-      lng: -74.0060,
-      name: 'New York, NY'
-    }
+    const newLocation: Location = TEST_LOCATIONS.NEW_YORK
 
     store.setLocation(newLocation)
     expect(store.currentLocation).toEqual(newLocation)
@@ -36,19 +31,7 @@ describe('Weather Store', () => {
 
   it('sets current weather correctly', () => {
     const store = useWeatherStore()
-    const weather: CurrentWeather = {
-      temperature: 75,
-      feelsLike: 78,
-      humidity: 60,
-      pressure: 1013,
-      windSpeed: 10,
-      windDirection: 180,
-      visibility: 10,
-      uvIndex: 3,
-      description: 'partly cloudy',
-      icon: '02d',
-      timestamp: 1234567890
-    }
+    const weather: CurrentWeather = TEST_WEATHER_DATA.CURRENT
 
     store.setCurrentWeather(weather)
     expect(store.currentWeather).toEqual(weather)
@@ -56,20 +39,7 @@ describe('Weather Store', () => {
 
   it('sets hourly forecast correctly', () => {
     const store = useWeatherStore()
-    const forecast: HourlyForecast[] = [
-      {
-        timestamp: 1234567890,
-        temperature: 72,
-        feelsLike: 75,
-        humidity: 65,
-        precipitationProbability: 20,
-        precipitationIntensity: 0,
-        windSpeed: 8,
-        windDirection: 180,
-        description: 'partly cloudy',
-        icon: '02d'
-      }
-    ]
+    const forecast: HourlyForecast[] = [TEST_WEATHER_DATA.HOURLY_SAMPLE]
 
     store.setHourlyForecast(forecast)
     expect(store.hourlyForecast).toEqual(forecast)
@@ -97,5 +67,119 @@ describe('Weather Store', () => {
 
     store.setError(null)
     expect(store.error).toBeNull()
+  })
+
+  it('sets daily forecast correctly', () => {
+    const store = useWeatherStore()
+    const forecast: DailyForecast[] = [TEST_WEATHER_DATA.DAILY_SAMPLE]
+
+    store.setDailyForecast(forecast)
+    expect(store.dailyForecast).toEqual(forecast)
+  })
+
+  it('sets location and clears data correctly', () => {
+    const store = useWeatherStore()
+    const newLocation: Location = TEST_LOCATIONS.NEW_YORK
+
+    // Set some data first
+    store.setCurrentWeather(TEST_WEATHER_DATA.CURRENT)
+    store.setHourlyForecast([TEST_WEATHER_DATA.HOURLY_SAMPLE])
+    store.setDailyForecast([TEST_WEATHER_DATA.DAILY_SAMPLE])
+    store.setError('Some error')
+
+    // Change location and verify data is cleared
+    store.setLocationAndClear(newLocation)
+
+    expect(store.currentLocation).toEqual(newLocation)
+    expect(store.currentWeather).toBeNull()
+    expect(store.hourlyForecast).toEqual([])
+    expect(store.dailyForecast).toEqual([])
+    expect(store.hourlyForecastByDate).toEqual({})
+    expect(store.error).toBeNull()
+  })
+
+  it('computes next7Days correctly', () => {
+    const store = useWeatherStore()
+    const mockDailyForecast: DailyForecast[] = Array.from({ length: 10 }, (_, i) => ({
+      ...TEST_WEATHER_DATA.DAILY_SAMPLE,
+      date: `2022-01-${String(i + 1).padStart(2, '0')}`
+    }))
+
+    store.setDailyForecast(mockDailyForecast)
+    expect(store.next7Days).toHaveLength(7)
+    expect(store.next7Days).toEqual(mockDailyForecast.slice(0, 7))
+  })
+
+  it('computes todaysForecast and tomorrowsForecast correctly', () => {
+    const store = useWeatherStore()
+    const mockDailyForecast: DailyForecast[] = [
+      { ...TEST_WEATHER_DATA.DAILY_SAMPLE, date: '2022-01-01' },
+      { ...TEST_WEATHER_DATA.DAILY_SAMPLE, date: '2022-01-02' }
+    ]
+
+    store.setDailyForecast(mockDailyForecast)
+    expect(store.todaysForecast).toEqual(mockDailyForecast[0])
+    expect(store.tomorrowsForecast).toEqual(mockDailyForecast[1])
+  })
+
+  it('returns null for todaysForecast when no data', () => {
+    const store = useWeatherStore()
+    expect(store.todaysForecast).toBeNull()
+  })
+
+  it('loads hourly forecast by date', async () => {
+    const store = useWeatherStore()
+    const mockHourlyData = [TEST_WEATHER_DATA.HOURLY_SAMPLE]
+
+    // Mock the weatherApi service
+    const mockGetHourlyForecastForDay = vi.fn().mockResolvedValue(mockHourlyData)
+    store.weatherApi.getHourlyForecastForDay = mockGetHourlyForecastForDay
+
+    await store.loadHourlyForecastForDay('2022-01-01')
+
+    expect(mockGetHourlyForecastForDay).toHaveBeenCalledWith(store.currentLocation, '2022-01-01')
+    expect(store.hourlyForecastByDate['2022-01-01']).toEqual(mockHourlyData)
+  })
+
+  it('handles hourly forecast loading error', async () => {
+    const store = useWeatherStore()
+    const errorMessage = 'API Error'
+
+    // Mock the weatherApi service to throw error
+    const mockGetHourlyForecastForDay = vi.fn().mockRejectedValue(new Error(errorMessage))
+    store.weatherApi.getHourlyForecastForDay = mockGetHourlyForecastForDay
+
+    // Expect the method to throw the error
+    await expect(store.loadHourlyForecastForDay('2022-01-01')).rejects.toThrow('API Error')
+  })
+
+  it('loads daily forecast correctly', async () => {
+    const store = useWeatherStore()
+    const mockDailyData = [TEST_WEATHER_DATA.DAILY_SAMPLE]
+
+    // Mock the weatherApi service
+    const mockGetDailyForecast = vi.fn().mockResolvedValue(mockDailyData)
+    store.weatherApi.getDailyForecast = mockGetDailyForecast
+
+    await store.loadDailyForecast()
+
+    expect(mockGetDailyForecast).toHaveBeenCalledWith(store.currentLocation)
+    expect(store.dailyForecast).toEqual(mockDailyData)
+    expect(store.isLoading).toBe(false)
+    expect(store.error).toBeNull()
+  })
+
+  it('handles daily forecast loading error', async () => {
+    const store = useWeatherStore()
+    const errorMessage = 'API Error'
+
+    // Mock the weatherApi service to throw error
+    const mockGetDailyForecast = vi.fn().mockRejectedValue(new Error(errorMessage))
+    store.weatherApi.getDailyForecast = mockGetDailyForecast
+
+    await store.loadDailyForecast()
+
+    expect(store.error).toBe('Failed to load daily forecast')
+    expect(store.isLoading).toBe(false)
   })
 })

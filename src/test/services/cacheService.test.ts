@@ -1,42 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { cacheService } from '../../services/cacheService'
-import type { CurrentWeather, HourlyForecast, Location } from '../../types/weather'
+import type { CurrentWeather, HourlyForecast, DailyForecast, Location } from '../../types/weather'
+import { TEST_LOCATIONS, TEST_WEATHER_DATA } from '../constants'
 
 describe('Cache Service', () => {
-  const testLocation: Location = {
-    lat: 41.8781,
-    lng: -87.6298,
-    name: 'Chicago, IL'
-  }
+  const testLocation: Location = TEST_LOCATIONS.CHICAGO
 
-  const testWeather: CurrentWeather = {
-    temperature: 75,
-    feelsLike: 78,
-    humidity: 60,
-    pressure: 1013,
-    windSpeed: 10,
-    windDirection: 180,
-    visibility: 10,
-    uvIndex: 3,
-    description: 'partly cloudy',
-    icon: '02d',
-    timestamp: 1234567890
-  }
+  const testWeather: CurrentWeather = TEST_WEATHER_DATA.CURRENT
 
-  const testForecast: HourlyForecast[] = [
-    {
-      timestamp: 1234567890,
-      temperature: 72,
-      feelsLike: 75,
-      humidity: 65,
-      precipitationProbability: 20,
-      precipitationIntensity: 0,
-      windSpeed: 8,
-      windDirection: 180,
-      description: 'partly cloudy',
-      icon: '02d'
-    }
-  ]
+  const testForecast: HourlyForecast[] = [TEST_WEATHER_DATA.HOURLY_SAMPLE]
+  const testDailyForecast: DailyForecast[] = [TEST_WEATHER_DATA.DAILY_SAMPLE]
 
   beforeEach(() => {
     cacheService.clear()
@@ -51,11 +24,7 @@ describe('Cache Service', () => {
     })
 
     it('returns null for non-existent location', () => {
-      const otherLocation: Location = {
-        lat: 40.7128,
-        lng: -74.0060,
-        name: 'New York, NY'
-      }
+      const otherLocation: Location = TEST_LOCATIONS.NEW_YORK
 
       const retrieved = cacheService.getCurrentWeather(otherLocation)
       expect(retrieved).toBeNull()
@@ -81,22 +50,34 @@ describe('Cache Service', () => {
     })
   })
 
-  describe('Hourly Forecast Cache', () => {
-    it('stores and retrieves hourly forecast', () => {
-      cacheService.setHourlyForecast(testLocation, testForecast)
-      const retrieved = cacheService.getHourlyForecast(testLocation)
+  describe('Daily Forecast Cache', () => {
+    it('stores and retrieves daily forecast', () => {
+      cacheService.setDailyForecast(testLocation, testDailyForecast)
+      const retrieved = cacheService.getDailyForecast(testLocation)
+
+      expect(retrieved).toEqual(testDailyForecast)
+    })
+
+    it('returns null for non-existent location', () => {
+      const otherLocation: Location = TEST_LOCATIONS.NEW_YORK
+
+      const retrieved = cacheService.getDailyForecast(otherLocation)
+      expect(retrieved).toBeNull()
+    })
+  })
+
+  describe('Hourly Forecast by Date Cache', () => {
+    const testDate = '2022-01-01'
+
+    it('stores and retrieves hourly forecast for specific date', () => {
+      cacheService.setHourlyForecastForDay(testLocation, testDate, testForecast)
+      const retrieved = cacheService.getHourlyForecastForDay(testLocation, testDate)
 
       expect(retrieved).toEqual(testForecast)
     })
 
-    it('returns null for non-existent location', () => {
-      const otherLocation: Location = {
-        lat: 40.7128,
-        lng: -74.0060,
-        name: 'New York, NY'
-      }
-
-      const retrieved = cacheService.getHourlyForecast(otherLocation)
+    it('returns null for non-existent date', () => {
+      const retrieved = cacheService.getHourlyForecastForDay(testLocation, '2022-01-02')
       expect(retrieved).toBeNull()
     })
   })
@@ -104,24 +85,29 @@ describe('Cache Service', () => {
   describe('Cache Management', () => {
     it('clears all cache data', () => {
       cacheService.setCurrentWeather(testLocation, testWeather)
-      cacheService.setHourlyForecast(testLocation, testForecast)
+      cacheService.setDailyForecast(testLocation, testDailyForecast)
+      cacheService.setHourlyForecastForDay(testLocation, '2022-01-01', testForecast)
 
       cacheService.clear()
 
       expect(cacheService.getCurrentWeather(testLocation)).toBeNull()
-      expect(cacheService.getHourlyForecast(testLocation)).toBeNull()
+      expect(cacheService.getDailyForecast(testLocation)).toBeNull()
+      expect(cacheService.getHourlyForecastForDay(testLocation, '2022-01-01')).toBeNull()
     })
 
     it('provides cache statistics', () => {
       cacheService.setCurrentWeather(testLocation, testWeather)
-      cacheService.setHourlyForecast(testLocation, testForecast)
+      cacheService.setDailyForecast(testLocation, testDailyForecast)
+      cacheService.setHourlyForecastForDay(testLocation, '2022-01-01', testForecast)
 
       const stats = cacheService.getCacheStats()
 
       expect(stats.currentWeather.total).toBe(1)
       expect(stats.currentWeather.fresh).toBe(1)
-      expect(stats.hourlyForecast.total).toBe(1)
-      expect(stats.hourlyForecast.fresh).toBe(1)
+      expect(stats.dailyForecast.total).toBe(1)
+      expect(stats.dailyForecast.fresh).toBe(1)
+      expect(stats.hourlyForecastByDate.total).toBe(1)
+      expect(stats.hourlyForecastByDate.fresh).toBe(1)
     })
   })
 })

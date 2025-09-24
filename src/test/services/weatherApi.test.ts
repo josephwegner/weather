@@ -3,6 +3,7 @@ import axios from 'axios'
 import { WeatherApiService } from '../../services/weatherApi'
 import { cacheService } from '../../services/cacheService'
 import type { Location } from '../../types/weather'
+import { TEST_LOCATIONS } from '../constants'
 
 vi.mock('axios')
 vi.mock('../../services/cacheService')
@@ -12,11 +13,7 @@ const mockedCache = vi.mocked(cacheService)
 
 describe('Weather API Service', () => {
   let weatherApi: WeatherApiService
-  const testLocation: Location = {
-    lat: 41.8781,
-    lng: -87.6298,
-    name: 'Chicago, IL'
-  }
+  const testLocation: Location = TEST_LOCATIONS.CHICAGO
 
   beforeEach(() => {
     weatherApi = new WeatherApiService()
@@ -34,15 +31,6 @@ describe('Weather API Service', () => {
       expect(mockedAxios.get).not.toHaveBeenCalled()
     })
 
-    it('returns hourly forecast mock data', async () => {
-      weatherApi.setDevMode({ mode: 'mock', mockScenarioId: 'extreme-heat' })
-
-      const result = await weatherApi.getHourlyForecast(testLocation)
-
-      expect(result).toHaveLength(24)
-      expect(result[0].temperature).toBeGreaterThan(100)
-      expect(mockedAxios.get).not.toHaveBeenCalled()
-    })
   })
 
   describe('Cache-First Mode', () => {

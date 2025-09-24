@@ -47,11 +47,60 @@ A personal weather Progressive Web App inspired by the Dark Sky interface, built
 
 ## Development Commands
 
-- `npm run dev` - Start development server
+### Core Development
+- `npm run dev` - Start development server with hot reload
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+
+### Code Quality
+- `npm run lint` - Run ESLint and auto-fix issues
+- `npm run lint:check` - Check linting without fixing
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
 - `npm run type-check` - Run TypeScript type checking
+
+### Testing
+- `npm run test` - Run tests in watch mode
+- `npm run test:run` - Run tests once
+- `npm run test:ui` - Open Vitest UI for interactive testing
+
+## Development Features
+
+### Mock Data & Offline Development
+The app includes a comprehensive development system for testing different weather scenarios:
+
+```javascript
+// Switch to mock mode for testing extreme conditions
+weatherApi.setDevMode({
+  mode: 'mock',
+  mockScenarioId: 'hurricane'
+})
+
+// Available scenarios:
+// - 'normal-chicago' - Typical weather with complete data
+// - 'extreme-heat' - Desert conditions (118°F)
+// - 'extreme-cold' - Arctic conditions (-25°F)
+// - 'hurricane' - Severe storm with 85mph winds
+// - 'missing-data' - Incomplete API response
+```
+
+### Development Modes
+- **`production`** - Standard API calls only
+- **`cache-first`** - Use cached data when available (default in dev)
+- **`mock`** - Use predefined mock scenarios
+- **`offline`** - Only use cached data, no API calls
+
+### Cache System
+- Automatically caches API responses for 10 minutes
+- Reduces API calls during development
+- View cache stats with `cacheService.getCacheStats()`
+
+### Testing Edge Cases
+The mock system includes scenarios for:
+- Extreme temperatures and weather conditions
+- Missing or incomplete API data
+- Network timeouts and API errors
+- High wind speeds and severe weather alerts
 
 ## Architecture
 
@@ -67,9 +116,29 @@ A personal weather Progressive Web App inspired by the Dark Sky interface, built
 ```
 src/
 ├── components/     # Vue components
-├── stores/         # Pinia stores
-├── services/       # API services
+├── stores/         # Pinia stores (weather state management)
+├── services/       # API services and caching
+│   ├── weatherApi.ts    # OpenWeatherMap API client
+│   ├── cacheService.ts  # Response caching
+│   └── mockData.ts      # Development mock scenarios
 ├── types/          # TypeScript type definitions
+├── test/           # Unit tests (Vitest)
 ├── utils/          # Utility functions
 └── assets/         # Static assets (CSS, images)
 ```
+
+## Continuous Integration
+
+GitHub Actions automatically run on commits to main:
+- Linting and code formatting checks
+- TypeScript type checking
+- Unit test suite (29 tests)
+- Production build verification
+- Security audit
+
+## Browser Compatibility
+
+- Chrome 88+
+- Firefox 78+
+- Safari 14+
+- Edge 88+

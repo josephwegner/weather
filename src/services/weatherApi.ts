@@ -108,34 +108,45 @@ export class WeatherApiService {
     return weatherData
   }
 
-  async getHourlyForecast(location: Location): Promise<HourlyForecast[]> {
-    this.log('getHourlyForecast called', { location, mode: this.devConfig.mode })
+
+  async getHourlyForecastForDay(location: Location, date: string): Promise<HourlyForecast[]> {
+    this.log('getHourlyForecastForDay called', { location, date, mode: this.devConfig.mode })
 
     // Handle mock mode
     if (this.devConfig.mode === 'mock') {
       const scenarioId = this.devConfig.mockScenarioId || 'normal-chicago'
       const scenario = getMockScenario(scenarioId)
       if (scenario) {
-        this.log('Returning mock hourly forecast for scenario:', scenarioId)
-        return scenario.hourlyForecast
+        this.log('Returning mock hourly forecast for day:', scenarioId)
+        // Generate 24 hours of mock data for the requested date
+        const targetDateMs = new Date(date + 'T00:00:00Z').getTime()
+        const baseTimestamp = Math.floor(targetDateMs / 1000)
+
+        return Array.from({ length: 24 }, (_, i) => {
+          const baseHour = scenario.hourlyForecast[i % scenario.hourlyForecast.length]
+          return {
+            ...baseHour,
+            timestamp: baseTimestamp + i * 3600
+          }
+        })
       }
     }
 
     // Handle offline mode
     if (this.devConfig.mode === 'offline') {
-      const cached = cacheService.getHourlyForecast(location)
+      const cached = cacheService.getHourlyForecastForDay(location, date)
       if (cached) {
-        this.log('Returning cached hourly forecast (offline mode)')
+        this.log('Returning cached hourly forecast for day (offline mode)')
         return cached
       }
-      throw new Error('No cached hourly forecast available in offline mode')
+      throw new Error('No cached hourly forecast available for this date in offline mode')
     }
 
     // Check cache first in cache-first mode
     if (this.devConfig.mode === 'cache-first') {
-      const cached = cacheService.getHourlyForecast(location)
+      const cached = cacheService.getHourlyForecastForDay(location, date)
       if (cached) {
-        this.log('Returning cached hourly forecast')
+        this.log('Returning cached hourly forecast for day')
         return cached
       }
     }
@@ -145,7 +156,7 @@ export class WeatherApiService {
       throw new Error('OpenWeatherMap API key not configured')
     }
 
-    this.log('Making API call for hourly forecast')
+    this.log('Making API call for hourly forecast for day:', date)
     const response = await axios.get(OPENWEATHER_BASE_URL, {
       params: {
         lat: location.lat,
@@ -156,31 +167,84 @@ export class WeatherApiService {
       }
     })
 
-    const hourlyData: HourlyForecast[] = response.data.hourly.slice(0, 48).map((hour: any): HourlyForecast => ({
-      timestamp: hour.dt,
-      temperature: Math.round(hour.temp),
-      feelsLike: Math.round(hour.feels_like),
-      humidity: hour.humidity,
-      precipitationProbability: Math.round((hour.pop || 0) * 100),
-      precipitationIntensity: hour.rain?.['1h'] || hour.snow?.['1h'] || 0,
-      windSpeed: Math.round(hour.wind_speed),
-      windDirection: hour.wind_deg,
-      description: hour.weather[0].description,
-      icon: hour.weather[0].icon
-    }))
+    // Filter to only include hours for the requested date in the location's local timezone
+    // OpenWeatherMap API returns timestamps in UTC, but we want to filter by local date
+    const targetDate = new Date(date + 'T00:00:00')
+    const localMidnight = targetDate.getTime()
+    const localNextMidnight = localMidnight + 86400000 // +24 hours
+
+    // Get timezone offset for the target date (in minutes)
+    const timezoneOffsetMs = targetDate.getTimezoneOffset() * 60000
+
+    // Convert local midnight times to UTC for comparison with API timestamps
+    const utcMidnightMs = localMidnight + timezoneOffsetMs
+    const utcNextMidnightMs = localNextMidnight + timezoneOffsetMs
+
+    const hourlyDataForDay: HourlyForecast[] = response.data.hourly
+      /*.filter((hour: any) => {
+        const hourMs = hour.dt * 1000 // API timestamp in UTC milliseconds
+        return hourMs >= utcMidnightMs && hourMs < utcNextMidnightMs
+      })*/
+      .map((hour: any): HourlyForecast => ({
+        timestamp: hour.dt,
+        temperature: Math.round(hour.temp),
+        feelsLike: Math.round(hour.feels_like),
+        humidity: hour.humidity,
+        precipitationProbability: Math.round((hour.pop || 0) * 100),
+        precipitationIntensity: hour.rain?.['1h'] || hour.snow?.['1h'] || 0,
+        windSpeed: Math.round(hour.wind_speed),
+        windDirection: hour.wind_deg,
+        description: hour.weather[0].description,
+        icon: hour.weather[0].icon
+      }))
+
+    console.log('hourly data for day', hourlyDataForDay, response.data)
 
     // Cache the result
-    cacheService.setHourlyForecast(location, hourlyData)
-    this.log('Hourly forecast cached')
+    cacheService.setHourlyForecastForDay(location, date, hourlyDataForDay)
+    this.log('Hourly forecast for day cached')
 
-    return hourlyData
+    return hourlyDataForDay
   }
 
   async getDailyForecast(location: Location): Promise<DailyForecast[]> {
+    this.log('getDailyForecast called', { location, mode: this.devConfig.mode })
+
+    // Handle mock mode
+    if (this.devConfig.mode === 'mock') {
+      const scenarioId = this.devConfig.mockScenarioId || 'normal-chicago'
+      const scenario = getMockScenario(scenarioId)
+      if (scenario) {
+        this.log('Returning mock daily forecast for scenario:', scenarioId)
+        return scenario.dailyForecast
+      }
+    }
+
+    // Handle offline mode
+    if (this.devConfig.mode === 'offline') {
+      const cached = cacheService.getDailyForecast(location)
+      if (cached) {
+        this.log('Returning cached daily forecast (offline mode)')
+        return cached
+      }
+      throw new Error('No cached daily forecast available in offline mode')
+    }
+
+    // Check cache first in cache-first mode
+    if (this.devConfig.mode === 'cache-first') {
+      const cached = cacheService.getDailyForecast(location)
+      if (cached) {
+        this.log('Returning cached daily forecast')
+        return cached
+      }
+    }
+
+    // Make API call
     if (!OPENWEATHER_API_KEY) {
       throw new Error('OpenWeatherMap API key not configured')
     }
 
+    this.log('Making API call for daily forecast')
     const response = await axios.get(OPENWEATHER_BASE_URL, {
       params: {
         lat: location.lat,
@@ -191,7 +255,7 @@ export class WeatherApiService {
       }
     })
 
-    return response.data.daily.slice(0, 10).map((day: any): DailyForecast => ({
+    const dailyData: DailyForecast[] = response.data.daily.slice(0, 7).map((day: any): DailyForecast => ({
       date: new Date(day.dt * 1000).toISOString().split('T')[0],
       timestamp: day.dt,
       temperatureHigh: Math.round(day.temp.max),
@@ -205,5 +269,11 @@ export class WeatherApiService {
       description: day.weather[0].description,
       icon: day.weather[0].icon
     }))
+
+    // Cache the result
+    cacheService.setDailyForecast(location, dailyData)
+    this.log('Daily forecast cached')
+
+    return dailyData
   }
 }

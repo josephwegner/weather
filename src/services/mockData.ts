@@ -1,4 +1,4 @@
-import type { CurrentWeather, HourlyForecast, Location } from '../types/weather'
+import type { CurrentWeather, HourlyForecast, DailyForecast, Location } from '../types/weather'
 
 export interface MockScenario {
   id: string
@@ -7,6 +7,7 @@ export interface MockScenario {
   location: Location
   currentWeather: CurrentWeather
   hourlyForecast: HourlyForecast[]
+  dailyForecast: DailyForecast[]
 }
 
 const now = Math.floor(Date.now() / 1000)
@@ -41,6 +42,20 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 180 + Math.sin(i * 0.1) * 45,
       description: i < 12 ? 'partly cloudy' : 'clear sky',
       icon: i < 12 ? '02d' : '01n'
+    })),
+    dailyForecast: Array.from({ length: 7 }, (_, i) => ({
+      date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
+      timestamp: now + i * 86400,
+      temperatureHigh: 78 + Math.sin(i * 0.5) * 8,
+      temperatureLow: 58 + Math.sin(i * 0.5) * 6,
+      precipitationProbability: Math.max(0, Math.sin(i * 0.7) * 40),
+      precipitationIntensity: 0,
+      windSpeed: 8 + Math.cos(i * 0.3) * 4,
+      windDirection: 180 + Math.sin(i * 0.2) * 30,
+      humidity: 65 + Math.cos(i * 0.4) * 10,
+      uvIndex: 3 + Math.sin(i * 0.6) * 2,
+      description: ['partly cloudy', 'sunny', 'cloudy', 'light rain', 'sunny', 'partly cloudy', 'clear sky'][i] || 'partly cloudy',
+      icon: ['02d', '01d', '04d', '10d', '01d', '02d', '01d'][i] || '02d'
     }))
   },
   {
@@ -72,6 +87,20 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 225 + Math.sin(i * 0.15) * 30,
       description: 'clear sky',
       icon: i >= 6 && i <= 18 ? '01d' : '01n'
+    })),
+    dailyForecast: Array.from({ length: 7 }, (_, i) => ({
+      date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
+      timestamp: now + i * 86400,
+      temperatureHigh: 118 + Math.sin(i * 0.3) * 5,
+      temperatureLow: 95 + Math.sin(i * 0.3) * 8,
+      precipitationProbability: 0,
+      precipitationIntensity: 0,
+      windSpeed: 15 + Math.cos(i * 0.2) * 5,
+      windDirection: 225 + Math.sin(i * 0.1) * 20,
+      humidity: 8 + Math.abs(Math.sin(i * 0.4) * 5),
+      uvIndex: 11,
+      description: 'clear sky',
+      icon: '01d'
     }))
   },
   {
@@ -101,6 +130,20 @@ export const mockScenarios: MockScenario[] = [
       precipitationIntensity: 0.5,
       windSpeed: 20 + Math.cos(i * 0.15) * 10,
       windDirection: 350 + Math.sin(i * 0.1) * 20,
+      description: 'heavy snow',
+      icon: '13d'
+    })),
+    dailyForecast: Array.from({ length: 7 }, (_, i) => ({
+      date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
+      timestamp: now + i * 86400,
+      temperatureHigh: -15 + Math.sin(i * 0.2) * 5,
+      temperatureLow: -35 + Math.sin(i * 0.2) * 8,
+      precipitationProbability: 85,
+      precipitationIntensity: 0.5,
+      windSpeed: 25 + Math.cos(i * 0.15) * 8,
+      windDirection: 350 + Math.sin(i * 0.1) * 15,
+      humidity: 80 + Math.cos(i * 0.3) * 10,
+      uvIndex: 0,
       description: 'heavy snow',
       icon: '13d'
     }))
@@ -134,6 +177,20 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 90 + Math.sin(i * 0.1) * 60,
       description: 'heavy intensity rain',
       icon: '10d'
+    })),
+    dailyForecast: Array.from({ length: 7 }, (_, i) => ({
+      date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
+      timestamp: now + i * 86400,
+      temperatureHigh: 82 + Math.sin(i * 0.3) * 3,
+      temperatureLow: 72 + Math.sin(i * 0.3) * 3,
+      precipitationProbability: 100,
+      precipitationIntensity: 12 + Math.cos(i * 0.4) * 5,
+      windSpeed: 85 + Math.sin(i * 0.2) * 10,
+      windDirection: 90 + Math.sin(i * 0.1) * 40,
+      humidity: 95 + Math.cos(i * 0.2) * 3,
+      uvIndex: 0,
+      description: 'heavy intensity rain',
+      icon: '10d'
     }))
   },
   {
@@ -165,6 +222,20 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 0,
       description: '',
       icon: ''
+    })),
+    dailyForecast: Array.from({ length: 3 }, (_, i) => ({
+      date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
+      timestamp: now + i * 86400,
+      temperatureHigh: i < 2 ? 70 + i * 5 : 0, // Missing data for day 3
+      temperatureLow: i < 2 ? 50 + i * 3 : 0,
+      precipitationProbability: 0,
+      precipitationIntensity: 0,
+      windSpeed: 0,
+      windDirection: 0,
+      humidity: 0,
+      uvIndex: 0,
+      description: i === 0 ? 'unknown' : '',
+      icon: i === 0 ? '' : ''
     }))
   }
 ]
