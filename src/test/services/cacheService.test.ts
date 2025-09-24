@@ -109,5 +109,44 @@ describe('Cache Service', () => {
       expect(stats.hourlyForecastByDate.total).toBe(1)
       expect(stats.hourlyForecastByDate.fresh).toBe(1)
     })
+    it('clears all cache data including new date-based caches', () => {
+      const dailyForecast: DailyForecast[] = [
+        {
+          date: '2022-01-01',
+          timestamp: 1640995200,
+          temperatureHigh: 80,
+          temperatureLow: 60,
+          precipitationProbability: 20,
+          precipitationIntensity: 0,
+          windSpeed: 12,
+          windDirection: 200,
+          humidity: 65,
+          uvIndex: 6,
+          description: 'cloudy',
+          icon: '04d'
+        }
+      ]
+
+      const hourlyForecast: HourlyForecast[] = Array.from({ length: 24 }, () => ({
+        timestamp: 1641081600,
+        temperature: 70,
+        feelsLike: 72,
+        humidity: 65,
+        precipitationProbability: 10,
+        precipitationIntensity: 0,
+        windSpeed: 10,
+        windDirection: 180,
+        description: 'sunny',
+        icon: '01d'
+      }))
+
+      cacheService.setDailyForecast(TEST_LOCATIONS.CHICAGO, dailyForecast)
+      cacheService.setHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, '2022-01-01', hourlyForecast)
+
+      cacheService.clear()
+
+      expect(cacheService.getDailyForecast(TEST_LOCATIONS.CHICAGO)).toBeNull()
+      expect(cacheService.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, '2022-01-01')).toBeNull()
+    })
   })
 })
