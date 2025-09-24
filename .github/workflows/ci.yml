@@ -37,7 +37,7 @@ jobs:
         run: npm run type-check
 
       - name: Run tests
-        run: npm run test:run
+        run: npm run test:all
 
       - name: Build application
         run: npm run build

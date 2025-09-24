@@ -26,12 +26,12 @@ A personal weather Progressive Web App inspired by the Dark Sky interface, built
 
    Edit `.env` and add your Visual Crossing API key:
    ```
-   VITE_VISUAL_CROSSING_API_KEY=your_api_key_here
+   VISUAL_CROSSING_API_KEY=your_api_key_here
    ```
 
 3. **Start development server:**
    ```bash
-   npm run dev
+   npm run dev:full
    ```
 
 4. **Build for production:**
@@ -53,8 +53,11 @@ The app uses a lazy-loading strategy to minimize API costs:
 ## Development Commands
 
 ### Core Development
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
+- `npm run dev` - Start client development server only
+- `npm run dev:server` - Start server only
+- `npm run dev:full` - Start both client and server with hot reload
+- `npm run build` - Build client and server for production
+- `npm start` - Run production server
 - `npm run preview` - Preview production build
 
 ### Code Quality
@@ -65,9 +68,13 @@ The app uses a lazy-loading strategy to minimize API costs:
 - `npm run type-check` - Run TypeScript type checking
 
 ### Testing
-- `npm run test` - Run tests in watch mode
-- `npm run test:run` - Run tests once
+- `npm run test` - Run client tests in watch mode
 - `npm run test:ui` - Open Vitest UI for interactive testing
+- `npm run test:all` - Run all tests (client + server) once
+- `npm run test:client` - Run client-side tests once
+- `npm run test:client:watch` - Run client tests in watch mode
+- `npm run test:server` - Run server-side tests once
+- `npm run test:server:watch` - Run server tests in watch mode
 
 ## Development Features
 
@@ -109,6 +116,7 @@ The mock system includes scenarios for:
 
 ## Architecture
 
+### Client (Frontend)
 - **Vue 3** - Frontend framework with Composition API
 - **Vite** - Build tool and dev server
 - **Pinia** - State management
@@ -116,20 +124,31 @@ The mock system includes scenarios for:
 - **Leaflet** - Interactive maps (for radar functionality)
 - **Workbox** - Service worker and PWA features
 
+### Server (Backend)
+- **Express** - Node.js web server
+- **TypeScript** - Type-safe server code
+- **CORS** - Cross-origin resource sharing
+- **Dotenv** - Environment variable management
+
 ## Project Structure
 
 ```
-src/
-├── components/     # Vue components
-├── stores/         # Pinia stores (weather state management)
-├── services/       # API services and caching
-│   ├── weatherApi.ts    # Visual Crossing API client
-│   ├── cacheService.ts  # Response caching
-│   └── mockData.ts      # Development mock scenarios
-├── types/          # TypeScript type definitions
-├── test/           # Unit tests (Vitest)
-├── utils/          # Utility functions
-└── assets/         # Static assets (CSS, images)
+src/                    # Client-side Vue application
+├── components/         # Vue components
+├── stores/             # Pinia stores (weather state management)
+├── services/           # API services and caching
+│   ├── weatherApi.ts   # Server API client (calls /api endpoints)
+│   ├── cacheService.ts # Response caching
+│   └── mockData.ts     # Development mock scenarios
+├── types/              # TypeScript type definitions
+├── test/               # Unit tests (Vitest)
+├── utils/              # Utility functions
+└── assets/             # Static assets (CSS, images)
+
+server/                 # Express server
+├── server.ts           # Main server file with API routes
+├── tsconfig.json       # Server TypeScript configuration
+└── dist/               # Compiled server files (generated)
 ```
 
 ## Continuous Integration
@@ -137,7 +156,7 @@ src/
 GitHub Actions automatically run on commits to main:
 - Linting and code formatting checks
 - TypeScript type checking
-- Unit test suite (29 tests)
+- Complete test suite (client + server)
 - Production build verification
 - Security audit
 

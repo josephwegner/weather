@@ -4,7 +4,7 @@ import { vi } from 'vitest'
 vi.mock('import.meta', () => ({
   env: {
     DEV: true,
-    VITE_OPENWEATHER_API_KEY: 'test-api-key'
+    VITE_API_BASE_URL: '/api'
   }
 }))
 

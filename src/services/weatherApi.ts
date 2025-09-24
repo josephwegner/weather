@@ -3,9 +3,7 @@ import type { Location, CurrentWeather, HourlyForecast, DailyForecast } from '..
 import { cacheService } from './cacheService'
 import { getMockScenario, mockScenarios } from './mockData'
 
-const VISUAL_CROSSING_API_KEY = import.meta.env.VITE_VISUAL_CROSSING_API_KEY || ''
-const VISUAL_CROSSING_BASE_URL =
-  'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 export type DevMode = 'production' | 'cache-first' | 'mock' | 'offline'
 
@@ -90,21 +88,11 @@ export class WeatherApiService {
       }
     }
 
-    // Make API call
-    if (!VISUAL_CROSSING_API_KEY) {
-      throw new Error('Visual Crossing API key not configured')
-    }
-
-    this.log('Making API call to Visual Crossing')
-    const locationString = `${location.lat},${location.lng}`
-    const response = await axios.get(`${VISUAL_CROSSING_BASE_URL}/${locationString}/today`, {
-      params: {
-        key: VISUAL_CROSSING_API_KEY,
-        unitGroup: 'us',
-        include: 'current',
-        contentType: 'json'
-      }
-    })
+    // Make API call to our server
+    this.log('Making API call to server')
+    const response = await axios.get(
+      `${API_BASE_URL}/weather/current/${location.lat}/${location.lng}`
+    )
 
     const currentConditions = response.data.currentConditions
     const weatherData: CurrentWeather = {
@@ -170,21 +158,11 @@ export class WeatherApiService {
       }
     }
 
-    // Make API call
-    if (!VISUAL_CROSSING_API_KEY) {
-      throw new Error('Visual Crossing API key not configured')
-    }
-
-    this.log('Making API call for hourly forecast for day:', date)
-    const locationString = `${location.lat},${location.lng}`
-    const response = await axios.get(`${VISUAL_CROSSING_BASE_URL}/${locationString}/${date}`, {
-      params: {
-        key: VISUAL_CROSSING_API_KEY,
-        unitGroup: 'us',
-        include: 'hours',
-        contentType: 'json'
-      }
-    })
+    // Make API call to our server
+    this.log('Making API call to server for hourly forecast for day:', date)
+    const response = await axios.get(
+      `${API_BASE_URL}/weather/hourly/${location.lat}/${location.lng}/${date}`
+    )
 
     // Visual Crossing returns a single day with hours array
     const dayData = response.data.days[0]
@@ -250,13 +228,8 @@ export class WeatherApiService {
       }
     }
 
-    // Make API call
-    if (!VISUAL_CROSSING_API_KEY) {
-      throw new Error('Visual Crossing API key not configured')
-    }
-
-    this.log('Making API call for daily forecast')
-    const locationString = `${location.lat},${location.lng}`
+    // Make API call to our server
+    this.log('Making API call to server for daily forecast')
 
     // Calculate date range: today through next 6 days (7 days total)
     const today = new Date()
@@ -267,15 +240,7 @@ export class WeatherApiService {
     const endDateStr = endDate.toISOString().split('T')[0]
 
     const response = await axios.get(
-      `${VISUAL_CROSSING_BASE_URL}/${locationString}/${startDateStr}/${endDateStr}`,
-      {
-        params: {
-          key: VISUAL_CROSSING_API_KEY,
-          unitGroup: 'us',
-          include: 'days',
-          contentType: 'json'
-        }
-      }
+      `${API_BASE_URL}/weather/daily/${location.lat}/${location.lng}/${startDateStr}/${endDateStr}`
     )
 
     const dailyData: DailyForecast[] = response.data.days.slice(0, 7).map(
