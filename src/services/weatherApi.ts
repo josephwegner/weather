@@ -4,7 +4,8 @@ import { cacheService } from './cacheService'
 import { getMockScenario, mockScenarios } from './mockData'
 
 const VISUAL_CROSSING_API_KEY = import.meta.env.VITE_VISUAL_CROSSING_API_KEY || ''
-const VISUAL_CROSSING_BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline'
+const VISUAL_CROSSING_BASE_URL =
+  'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline'
 
 export type DevMode = 'production' | 'cache-first' | 'mock' | 'offline'
 
@@ -25,7 +26,7 @@ export class WeatherApiService {
   }
 
   getAvailableScenarios() {
-    return mockScenarios.map(scenario => ({
+    return mockScenarios.map((scenario) => ({
       id: scenario.id,
       name: scenario.name,
       description: scenario.description
@@ -45,14 +46,14 @@ export class WeatherApiService {
       'clear-night': '01n',
       'partly-cloudy-day': '02d',
       'partly-cloudy-night': '02n',
-      'cloudy': '04d',
-      'fog': '50d',
-      'wind': '50d',
-      'rain': '10d',
-      'sleet': '13d',
-      'snow': '13d',
-      'hail': '13d',
-      'thunderstorm': '11d'
+      cloudy: '04d',
+      fog: '50d',
+      wind: '50d',
+      rain: '10d',
+      sleet: '13d',
+      snow: '13d',
+      hail: '13d',
+      thunderstorm: '11d'
     }
     return iconMap[vcIcon] || '01d'
   }
@@ -126,7 +127,6 @@ export class WeatherApiService {
 
     return weatherData
   }
-
 
   async getHourlyForecastForDay(location: Location, date: string): Promise<HourlyForecast[]> {
     this.log('getHourlyForecastForDay called', { location, date, mode: this.devConfig.mode })
@@ -257,29 +257,43 @@ export class WeatherApiService {
 
     this.log('Making API call for daily forecast')
     const locationString = `${location.lat},${location.lng}`
-    const response = await axios.get(`${VISUAL_CROSSING_BASE_URL}/${locationString}/next7days`, {
-      params: {
-        key: VISUAL_CROSSING_API_KEY,
-        unitGroup: 'us',
-        include: 'days',
-        contentType: 'json'
-      }
-    })
 
-    const dailyData: DailyForecast[] = response.data.days.slice(0, 7).map((day: any): DailyForecast => ({
-      date: day.datetime,
-      timestamp: Math.floor(new Date(day.datetime).getTime() / 1000),
-      temperatureHigh: Math.round(day.tempmax),
-      temperatureLow: Math.round(day.tempmin),
-      precipitationProbability: Math.round((day.precipprob || 0)),
-      precipitationIntensity: day.precip || 0,
-      windSpeed: Math.round(day.windspeed),
-      windDirection: day.winddir,
-      humidity: day.humidity,
-      uvIndex: day.uvindex || 0,
-      description: day.conditions.toLowerCase(),
-      icon: this.mapVisualCrossingIcon(day.icon)
-    }))
+    // Calculate date range: today through next 6 days (7 days total)
+    const today = new Date()
+    const endDate = new Date(today)
+    endDate.setDate(today.getDate() + 6)
+
+    const startDateStr = today.toISOString().split('T')[0]
+    const endDateStr = endDate.toISOString().split('T')[0]
+
+    const response = await axios.get(
+      `${VISUAL_CROSSING_BASE_URL}/${locationString}/${startDateStr}/${endDateStr}`,
+      {
+        params: {
+          key: VISUAL_CROSSING_API_KEY,
+          unitGroup: 'us',
+          include: 'days',
+          contentType: 'json'
+        }
+      }
+    )
+
+    const dailyData: DailyForecast[] = response.data.days.slice(0, 7).map(
+      (day: any): DailyForecast => ({
+        date: day.datetime,
+        timestamp: Math.floor(new Date(day.datetime).getTime() / 1000),
+        temperatureHigh: Math.round(day.tempmax),
+        temperatureLow: Math.round(day.tempmin),
+        precipitationProbability: Math.round(day.precipprob || 0),
+        precipitationIntensity: day.precip || 0,
+        windSpeed: Math.round(day.windspeed),
+        windDirection: day.winddir,
+        humidity: day.humidity,
+        uvIndex: day.uvindex || 0,
+        description: day.conditions.toLowerCase(),
+        icon: this.mapVisualCrossingIcon(day.icon)
+      })
+    )
 
     // Cache the result
     cacheService.setDailyForecast(location, dailyData)
