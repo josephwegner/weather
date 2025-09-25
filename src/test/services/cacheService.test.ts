@@ -136,6 +136,11 @@ describe('Cache Service', () => {
         precipitationIntensity: 0,
         windSpeed: 10,
         windDirection: 180,
+        windGust: 15,
+        pressure: 1013,
+        uvIndex: 3,
+        cloudCover: 20,
+        visibility: 10,
         description: 'sunny',
         icon: '01d'
       }))

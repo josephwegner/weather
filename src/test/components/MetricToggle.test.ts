@@ -1,19 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import MetricToggle from '../../components/MetricToggle.vue'
-
-export type MetricType =
-  | 'temperature'
-  | 'feelsLike'
-  | 'precipitationProbability'
-  | 'precipitationIntensity'
-  | 'humidity'
-  | 'windSpeed'
-  | 'windGust'
-  | 'pressure'
-  | 'uvIndex'
-  | 'cloudCover'
-  | 'visibility'
+import type { MetricType } from '../../types/metrics'
 
 describe('MetricToggle Component', () => {
   const defaultProps = {
@@ -144,5 +132,87 @@ describe('MetricToggle Component', () => {
 
     const selectedButton = wrapper.find('.metric-windSpeed')
     expect(selectedButton.classes()).toContain('selected')
+  })
+
+  it('has correct ARIA pressed attributes', () => {
+    const wrapper = mount(MetricToggle, {
+      props: defaultProps
+    })
+
+    // Selected metric should have aria-pressed="true"
+    const selectedButton = wrapper.find(`.metric-${defaultProps.selectedMetric}`)
+    expect(selectedButton.attributes('aria-pressed')).toBe('true')
+
+    // Non-selected metrics should have aria-pressed="false"
+    const nonSelectedMetrics = defaultProps.availableMetrics.filter(
+      (metric) => metric.key !== defaultProps.selectedMetric
+    )
+
+    nonSelectedMetrics.forEach((metric) => {
+      const button = wrapper.find(`.metric-${metric.key}`)
+      expect(button.attributes('aria-pressed')).toBe('false')
+    })
+  })
+
+  it('has descriptive ARIA labels for all metrics', () => {
+    const wrapper = mount(MetricToggle, {
+      props: defaultProps
+    })
+
+    defaultProps.availableMetrics.forEach((metric) => {
+      const button = wrapper.find(`.metric-${metric.key}`)
+      const ariaLabel = button.attributes('aria-label')
+
+      expect(ariaLabel).toBeTruthy()
+      expect(ariaLabel).toContain('Switch to')
+      expect(ariaLabel).toContain(metric.label.toLowerCase())
+      expect(ariaLabel).toContain('metric')
+
+      if (metric.unit) {
+        expect(ariaLabel).toContain(metric.unit)
+      }
+    })
+  })
+
+  it('updates ARIA pressed state when selection changes', async () => {
+    const wrapper = mount(MetricToggle, {
+      props: defaultProps
+    })
+
+    const initialSelected = wrapper.find('.metric-temperature')
+    const toSelect = wrapper.find('.metric-humidity')
+
+    // Initial state
+    expect(initialSelected.attributes('aria-pressed')).toBe('true')
+    expect(toSelect.attributes('aria-pressed')).toBe('false')
+
+    // Click to change selection
+    await toSelect.trigger('click')
+
+    // Check that event was emitted (component itself doesn't change state)
+    expect(wrapper.emitted('metric-change')).toBeTruthy()
+    expect(wrapper.emitted('metric-change')![0]).toEqual(['humidity'])
+  })
+
+  it('generates correct ARIA labels for metrics with and without units', () => {
+    const propsWithMixedUnits = {
+      selectedMetric: 'uvIndex' as MetricType,
+      availableMetrics: [
+        { key: 'temperature' as MetricType, label: 'TEMP', unit: '°F' },
+        { key: 'uvIndex' as MetricType, label: 'UV INDEX', unit: '' } // No unit
+      ]
+    }
+
+    const wrapper = mount(MetricToggle, {
+      props: propsWithMixedUnits
+    })
+
+    // Metric with unit
+    const tempButton = wrapper.find('.metric-temperature')
+    expect(tempButton.attributes('aria-label')).toBe('Switch to temp metric in °F')
+
+    // Metric without unit
+    const uvButton = wrapper.find('.metric-uvIndex')
+    expect(uvButton.attributes('aria-label')).toBe('Switch to uv index metric')
   })
 })

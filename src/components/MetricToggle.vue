@@ -5,6 +5,8 @@
       :key="metric.key"
       class="metric-button"
       :class="{ selected: selectedMetric === metric.key, [`metric-${metric.key}`]: true }"
+      :aria-pressed="selectedMetric === metric.key"
+      :aria-label="`Switch to ${metric.label.toLowerCase()} metric${metric.unit ? ' in ' + metric.unit : ''}`"
       @click="handleMetricClick(metric.key)"
     >
       {{ metric.unit ? `${metric.label} (${metric.unit})` : metric.label }}
@@ -13,24 +15,7 @@
 </template>
 
 <script setup lang="ts">
-  export type MetricType =
-    | 'temperature'
-    | 'feelsLike'
-    | 'precipitationProbability'
-    | 'precipitationIntensity'
-    | 'humidity'
-    | 'windSpeed'
-    | 'windGust'
-    | 'pressure'
-    | 'uvIndex'
-    | 'cloudCover'
-    | 'visibility'
-
-  interface MetricOption {
-    key: MetricType
-    label: string
-    unit: string
-  }
+  import type { MetricType, MetricOption } from '../types/metrics'
 
   interface Props {
     selectedMetric: MetricType
