@@ -7,23 +7,18 @@
       :aria-expanded="isExpanded"
       :aria-controls="`hourly-${dayForecast.date}`"
     >
-      <div class="day-info">
-        <div class="day-name">{{ dayName }}</div>
-        <div class="weather-icon" data-testid="weather-icon">
-          <img :src="iconUrl" :alt="dayForecast.description" />
-        </div>
-        <div class="description">{{ dayForecast.description }}</div>
+      <div class="day-name">{{ dayName }}</div>
+
+      <div class="weather-icon" data-testid="weather-icon">
+        <img :src="iconUrl" :alt="dayForecast.description" />
       </div>
 
-      <div class="temperature">
-        <span class="high">{{ Math.round(dayForecast.temperatureHigh) }}°</span>
+      <div class="temperature-range">
         <span class="low">{{ Math.round(dayForecast.temperatureLow) }}°</span>
+        <span class="high">{{ Math.round(dayForecast.temperatureHigh) }}°</span>
       </div>
 
-      <div class="precipitation">
-        <span class="precip-probability">{{ dayForecast.precipitationProbability }}%</span>
-        <span class="precip-icon">🌧️</span>
-      </div>
+      <div class="precipitation-prob">{{ dayForecast.precipitationProbability }}%</div>
 
       <div class="expand-arrow" :class="{ rotated: isExpanded }">▼</div>
     </button>
@@ -156,22 +151,22 @@
 
 <style scoped>
   .day-forecast-row {
-    background: rgb(51, 65, 85);
-    border: 1px solid rgb(71, 85, 105);
-    border-radius: 8px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(71, 85, 105, 0.3);
     overflow: hidden;
-    transition: box-shadow 0.2s ease;
   }
 
-  .day-forecast-row:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  .day-forecast-row:last-child {
+    border-bottom: none;
   }
 
   .day-summary {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto auto;
     align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
     cursor: pointer;
     transition: background-color 0.2s ease;
     border: none;
@@ -181,65 +176,48 @@
   }
 
   .day-summary:hover {
-    background-color: rgb(71, 85, 105);
-  }
-
-  .day-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex: 1;
+    background-color: rgba(71, 85, 105, 0.3);
   }
 
   .day-name {
-    font-weight: 600;
-    font-size: 1rem;
-    min-width: 80px;
+    font-weight: 500;
+    font-size: 0.9rem;
     color: white;
+    text-align: left;
+  }
+
+  .weather-icon {
+    justify-self: center;
   }
 
   .weather-icon img {
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
   }
 
-  .description {
-    color: rgb(148, 163, 184);
-    text-transform: capitalize;
-  }
-
-  .temperature {
+  .temperature-range {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    margin: 0 1rem;
+    min-width: 60px;
   }
 
-  .temperature .high {
+  .temperature-range .low {
+    font-size: 0.9rem;
+    color: rgb(148, 163, 184);
+  }
+
+  .temperature-range .high {
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     color: white;
   }
 
-  .temperature .low {
-    font-size: 0.9rem;
-    color: rgb(148, 163, 184);
-  }
-
-  .precipitation {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0 1rem;
-  }
-
-  .precip-probability {
-    font-size: 0.9rem;
+  .precipitation-prob {
+    font-size: 0.85rem;
     color: #4a90e2;
-  }
-
-  .precip-icon {
-    font-size: 1rem;
+    text-align: center;
+    min-width: 40px;
   }
 
   .expand-arrow {
@@ -256,7 +234,6 @@
   .hourly-section {
     border-top: 1px solid rgb(71, 85, 105);
     background-color: rgb(30, 41, 59);
-    padding: 1rem;
   }
 
   .loading-hourly {
@@ -271,6 +248,10 @@
     padding: 1rem;
     background-color: rgba(248, 113, 113, 0.1);
     border-radius: 4px;
+  }
+
+  .hourly-forecast {
+    padding-top: 0.5rem;
   }
 
   .hourly-forecast h4 {
@@ -290,6 +271,7 @@
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    padding: 0 1rem;
   }
 
   .hourly-table::-webkit-scrollbar {
@@ -313,17 +295,5 @@
     color: rgb(148, 163, 184);
     padding: 1rem;
     font-style: italic;
-  }
-
-  @media (max-width: 768px) {
-    .day-summary {
-      flex-direction: column;
-      gap: 0.5rem;
-      align-items: stretch;
-    }
-
-    .day-info {
-      justify-content: space-between;
-    }
   }
 </style>

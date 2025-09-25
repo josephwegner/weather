@@ -57,7 +57,7 @@
     color: rgb(148, 163, 184);
     border: 1px solid rgb(71, 85, 105);
     border-radius: 20px;
-    padding: 8px 16px;
+    padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
     font-weight: 500;
     white-space: nowrap;

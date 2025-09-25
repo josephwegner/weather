@@ -1,10 +1,6 @@
 <template>
   <div id="app" class="min-h-screen bg-slate-900 text-white">
     <div class="container mx-auto px-4 py-8">
-      <header class="mb-8">
-        <h1 class="text-3xl font-light text-center">Personal Weather</h1>
-      </header>
-
       <main>
         <div class="max-w-md mx-auto">
           <div class="bg-slate-800 rounded-lg p-6 mb-6">

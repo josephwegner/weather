@@ -1,7 +1,5 @@
 <template>
   <div class="weekly-forecast">
-    <h2>7-Day Forecast</h2>
-
     <div v-if="store.isLoading" class="loading">Loading forecast...</div>
 
     <div v-else-if="store.error" class="error">
@@ -71,8 +69,8 @@
   }
 
   .forecast-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    background: rgba(51, 65, 85, 0.8);
+    border: 1px solid rgba(71, 85, 105, 0.5);
+    border-radius: 8px;
   }
 </style>
