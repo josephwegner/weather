@@ -19,45 +19,55 @@
       </div>
 
       <div class="precipitation-prob">{{ dayForecast.precipitationProbability }}%</div>
-
-      <div class="expand-arrow" :class="{ rotated: isExpanded }">▼</div>
     </button>
 
-    <div
-      v-if="isExpanded"
-      class="hourly-section"
-      data-testid="hourly-detail"
-      :id="`hourly-${dayForecast.date}`"
-    >
-      <div v-if="isLoadingHourly" class="loading-hourly" data-testid="hourly-loading">
-        Loading hourly forecast...
+    <transition name="accordion">
+      <div
+        v-if="isExpanded"
+        class="hourly-section"
+        data-testid="hourly-detail"
+        :id="`hourly-${dayForecast.date}`"
+      >
+        <div
+          v-if="isLoadingHourly"
+          class="loading-hourly hourly-state-container"
+          data-testid="hourly-loading"
+        >
+          Loading hourly forecast...
+        </div>
+
+        <div
+          v-else-if="hourlyError"
+          class="error-hourly hourly-state-container"
+          data-testid="hourly-error"
+        >
+          {{ hourlyError }}
+        </div>
+
+        <div v-else-if="hourlyData" class="hourly-forecast">
+          <table class="hourly-table" data-testid="hourly-table">
+            <tbody>
+              <HourlyForecastRow
+                v-for="hour in hourlyData"
+                :key="hour.timestamp"
+                :hour-data="hour"
+                :selected-metric="selectedMetric"
+              />
+            </tbody>
+          </table>
+
+          <MetricToggle
+            :selected-metric="selectedMetric"
+            :available-metrics="availableMetrics"
+            @metric-change="handleMetricChange"
+          />
+        </div>
+
+        <div v-else class="no-hourly-data hourly-state-container">
+          No hourly data available for this day
+        </div>
       </div>
-
-      <div v-else-if="hourlyError" class="error-hourly" data-testid="hourly-error">
-        {{ hourlyError }}
-      </div>
-
-      <div v-else-if="hourlyData" class="hourly-forecast">
-        <table class="hourly-table" data-testid="hourly-table">
-          <tbody>
-            <HourlyForecastRow
-              v-for="hour in hourlyData"
-              :key="hour.timestamp"
-              :hour-data="hour"
-              :selected-metric="selectedMetric"
-            />
-          </tbody>
-        </table>
-
-        <MetricToggle
-          :selected-metric="selectedMetric"
-          :available-metrics="availableMetrics"
-          @metric-change="handleMetricChange"
-        />
-      </div>
-
-      <div v-else class="no-hourly-data">No hourly data available for this day</div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -163,7 +173,7 @@
 
   .day-summary {
     display: grid;
-    grid-template-columns: 1fr auto 1fr auto auto;
+    grid-template-columns: 1fr auto 1fr auto;
     align-items: center;
     gap: 1rem;
     padding: 0.5rem 1rem;
@@ -220,20 +230,37 @@
     min-width: 40px;
   }
 
-  .expand-arrow {
-    font-size: 0.8rem;
-    color: rgb(148, 163, 184);
-    transition: transform 0.3s ease;
-    margin-left: 0.5rem;
-  }
-
-  .expand-arrow.rotated {
-    transform: rotate(180deg);
-  }
-
   .hourly-section {
     border-top: 1px solid rgb(71, 85, 105);
     background-color: rgb(30, 41, 59);
+    overflow: hidden;
+  }
+
+  .accordion-enter-active,
+  .accordion-leave-active {
+    transition:
+      max-height 0.2s ease,
+      opacity 0.2s ease;
+    overflow: hidden;
+  }
+
+  .accordion-enter-from,
+  .accordion-leave-to {
+    max-height: 0;
+    opacity: 0;
+  }
+
+  .accordion-enter-to,
+  .accordion-leave-from {
+    max-height: 500px;
+    opacity: 1;
+  }
+
+  .hourly-state-container {
+    min-height: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .loading-hourly {
