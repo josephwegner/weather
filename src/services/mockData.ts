@@ -36,7 +36,7 @@ export const mockScenarios: MockScenario[] = [
       temperature: 72 + Math.sin(i * 0.3) * 10,
       feelsLike: 75 + Math.sin(i * 0.3) * 10,
       humidity: 65 + Math.cos(i * 0.2) * 15,
-      precipitationProbability: Math.max(0, Math.sin(i * 0.4) * 30),
+      precipitationProbability: Math.round(Math.max(0, Math.sin(i * 0.4) * 30)),
       precipitationIntensity: 0,
       windSpeed: 8 + Math.cos(i * 0.1) * 5,
       windDirection: 180 + Math.sin(i * 0.1) * 45,
@@ -48,7 +48,7 @@ export const mockScenarios: MockScenario[] = [
       timestamp: now + i * 86400,
       temperatureHigh: 78 + Math.sin(i * 0.5) * 8,
       temperatureLow: 58 + Math.sin(i * 0.5) * 6,
-      precipitationProbability: Math.max(0, Math.sin(i * 0.7) * 40),
+      precipitationProbability: Math.round(Math.max(0, Math.sin(i * 0.7) * 40)),
       precipitationIntensity: 0,
       windSpeed: 8 + Math.cos(i * 0.3) * 4,
       windDirection: 180 + Math.sin(i * 0.2) * 30,
@@ -245,9 +245,4 @@ export const mockScenarios: MockScenario[] = [
 
 export const getMockScenario = (scenarioId: string): MockScenario | null => {
   return mockScenarios.find((scenario) => scenario.id === scenarioId) || null
-}
-
-export const getRandomScenario = (): MockScenario => {
-  const randomIndex = Math.floor(Math.random() * mockScenarios.length)
-  return mockScenarios[randomIndex]
 }

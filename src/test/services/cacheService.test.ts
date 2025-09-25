@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { cacheService } from '../../services/cacheService'
+import { cacheService } from '../../services/cache'
 import type { CurrentWeather, HourlyForecast, DailyForecast, Location } from '../../types/weather'
 import { TEST_LOCATIONS, TEST_WEATHER_DATA } from '../constants'
 

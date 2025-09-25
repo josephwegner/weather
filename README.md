@@ -87,15 +87,25 @@ The app uses a lazy-loading strategy to minimize API costs:
 
 ## Development Features
 
-### Mock Data & Offline Development
+### Mock Data & Development Configuration
 
 The app includes a comprehensive development system for testing different weather scenarios:
 
 ```javascript
 // Switch to mock mode for testing extreme conditions
-weatherApi.setDevMode({
-  mode: 'mock',
+weatherApi.setConfig({
+  mockAPIRequests: true,
   mockScenarioId: 'hurricane'
+})
+
+// Switch to real API calls during development
+weatherApi.setConfig({
+  mockAPIRequests: false
+})
+
+// Disable caching for testing
+weatherApi.setConfig({
+  cacheEnabled: false
 })
 
 // Available scenarios:
@@ -106,12 +116,38 @@ weatherApi.setDevMode({
 // - 'missing-data' - Incomplete API response
 ```
 
-### Development Modes
+### Configuration Options
 
-- **`production`** - Standard API calls only
-- **`cache-first`** - Use cached data when available (default in dev)
-- **`mock`** - Use predefined mock scenarios
-- **`offline`** - Only use cached data, no API calls
+- **`cacheEnabled`** - Enable/disable caching layer (default: true)
+- **`mockAPIRequests`** - Use mock data instead of real API calls (default: true in dev, false in production)
+- **`mockScenarioId`** - Which mock scenario to use (default: 'normal-chicago')
+- **`enableLogging`** - Enable console logging (default: true in dev, false in production)
+
+### Environment Variables
+
+- **`VITE_USE_REAL_API=true`** - Force real API calls even in development
+- **`VITE_DISABLE_CACHE=true`** - Disable caching entirely
+- **`VITE_MOCK_SCENARIO=hurricane`** - Set default mock scenario
+
+### Development Console Commands
+
+In development, these methods are available via `window.weatherApi`:
+
+```javascript
+// Switch between modes
+window.weatherApi.useRealAPI() // Use real API calls
+window.weatherApi.useMockAPI() // Use mock data
+
+// Cache management
+window.weatherApi.toggleCache() // Toggle caching on/off
+window.weatherApi.clearCache() // Clear all cached data
+
+// Mock scenarios
+window.weatherApi.setMockScenario('hurricane')
+
+// View current configuration
+window.weatherApi.getCurrentConfig()
+```
 
 ### Cache System
 

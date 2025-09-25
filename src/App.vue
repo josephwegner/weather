@@ -40,18 +40,18 @@
 <script setup lang="ts">
   import { onMounted } from 'vue'
   import { useWeatherStore } from './stores/weather'
-  import { WeatherApiService } from './services/weatherApi'
   import WeeklyForecast from './components/WeeklyForecast.vue'
 
   const weatherStore = useWeatherStore()
-  const weatherApi = new WeatherApiService()
 
   const fetchWeatherData = async () => {
     try {
       weatherStore.setLoading(true)
       weatherStore.setError(null)
 
-      const currentWeather = await weatherApi.getCurrentWeather(weatherStore.currentLocation)
+      const currentWeather = await weatherStore.weatherApi.getCurrentWeather(
+        weatherStore.currentLocation
+      )
       weatherStore.setCurrentWeather(currentWeather)
     } catch (error) {
       weatherStore.setError(error instanceof Error ? error.message : 'Failed to fetch weather data')

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import axios from 'axios'
 import { WeatherApiService } from '../../services/weatherApi'
-import { cacheService } from '../../services/cacheService'
+import { cacheService } from '../../services/cache'
 import type { Location } from '../../types/weather'
 import { TEST_LOCATIONS } from '../constants'
 
 vi.mock('axios')
-vi.mock('../../services/cacheService')
+vi.mock('../../services/cache')
 
 const mockedAxios = vi.mocked(axios)
 const mockedCache = vi.mocked(cacheService)
@@ -23,9 +23,21 @@ describe('Weather API Service', () => {
     vi.clearAllMocks()
   })
 
-  describe('Mock Mode', () => {
-    it('returns mock data when in mock mode', async () => {
-      weatherApi.setDevMode({ mode: 'mock', mockScenarioId: 'normal-chicago' })
+  describe('Environment-based Configuration Defaults', () => {
+    it('should have development-friendly defaults in test environment', () => {
+      const config = weatherApi.getCurrentConfig()
+
+      // In test/development, should default to mock mode with cache enabled
+      expect(config.cacheEnabled).toBe(true)
+      expect(config.mockAPIRequests).toBe(true)
+      expect(config.enableLogging).toBe(true)
+      expect(config.mockScenarioId).toBe('normal-chicago')
+    })
+  })
+
+  describe('Mock API Requests Mode', () => {
+    it('returns mock data when mockAPIRequests is true', async () => {
+      weatherApi.setConfig({ mockAPIRequests: true, mockScenarioId: 'normal-chicago' })
 
       const result = await weatherApi.getCurrentWeather(testLocation)
 
@@ -35,8 +47,8 @@ describe('Weather API Service', () => {
     })
   })
 
-  describe('Cache-First Mode', () => {
-    it('returns cached data when available', async () => {
+  describe('Cache Behavior', () => {
+    it('returns cached data when available (with cache enabled)', async () => {
       const cachedWeather = {
         temperature: 80,
         feelsLike: 85,
@@ -52,7 +64,7 @@ describe('Weather API Service', () => {
       }
 
       mockedCache.getCurrentWeather.mockReturnValue(cachedWeather)
-      weatherApi.setDevMode({ mode: 'cache-first' })
+      weatherApi.setConfig({ cacheEnabled: true, mockAPIRequests: false })
 
       const result = await weatherApi.getCurrentWeather(testLocation)
 
@@ -60,7 +72,7 @@ describe('Weather API Service', () => {
       expect(mockedAxios.get).not.toHaveBeenCalled()
     })
 
-    it('makes API call when cache is empty', async () => {
+    it('makes API call when cache is empty and mockAPIRequests is false', async () => {
       mockedCache.getCurrentWeather.mockReturnValue(null)
       mockedAxiosGet.mockResolvedValue({
         data: {
@@ -80,7 +92,7 @@ describe('Weather API Service', () => {
         }
       })
 
-      weatherApi.setDevMode({ mode: 'cache-first' })
+      weatherApi.setConfig({ cacheEnabled: true, mockAPIRequests: false })
 
       const result = await weatherApi.getCurrentWeather(testLocation)
 
@@ -90,10 +102,68 @@ describe('Weather API Service', () => {
       expect(mockedAxios.get).toHaveBeenCalledOnce()
       expect(mockedCache.setCurrentWeather).toHaveBeenCalledWith(testLocation, result)
     })
+
+    it('returns mock data when cache is empty and mockAPIRequests is true', async () => {
+      mockedCache.getCurrentWeather.mockReturnValue(null)
+      weatherApi.setConfig({
+        cacheEnabled: true,
+        mockAPIRequests: true,
+        mockScenarioId: 'normal-chicago'
+      })
+
+      const result = await weatherApi.getCurrentWeather(testLocation)
+
+      expect(result.temperature).toBe(72)
+      expect(result.description).toBe('partly cloudy')
+      expect(mockedAxios.get).not.toHaveBeenCalled()
+    })
+
+    it('bypasses cache and makes API call when cache is disabled', async () => {
+      const cachedWeather = {
+        temperature: 80,
+        feelsLike: 85,
+        humidity: 70,
+        pressure: 1015,
+        windSpeed: 5,
+        windDirection: 90,
+        visibility: 10,
+        uvIndex: 4,
+        description: 'sunny',
+        icon: '01d',
+        timestamp: Date.now()
+      }
+
+      mockedCache.getCurrentWeather.mockReturnValue(cachedWeather)
+      mockedAxiosGet.mockResolvedValue({
+        data: {
+          currentConditions: {
+            temp: 75,
+            feelslike: 78,
+            humidity: 60,
+            pressure: 1013,
+            windspeed: 10,
+            winddir: 180,
+            visibility: 10,
+            uvindex: 3,
+            conditions: 'Clear sky',
+            icon: 'clear-day',
+            datetime: '2022-01-01T12:00:00'
+          }
+        }
+      })
+
+      weatherApi.setConfig({ cacheEnabled: false, mockAPIRequests: false })
+
+      const result = await weatherApi.getCurrentWeather(testLocation)
+
+      expect(result.temperature).toBe(75) // Should be API result, not cached
+      expect(mockedAxios.get).toHaveBeenCalledOnce()
+      expect(mockedCache.setCurrentWeather).not.toHaveBeenCalled() // No caching when disabled
+    })
   })
 
-  describe('Offline Mode', () => {
-    it('returns cached data in offline mode', async () => {
+  describe('Cache-Only Mode (no fallback)', () => {
+    it('returns cached data when available', async () => {
       const cachedWeather = {
         temperature: 70,
         feelsLike: 73,
@@ -109,7 +179,8 @@ describe('Weather API Service', () => {
       }
 
       mockedCache.getCurrentWeather.mockReturnValue(cachedWeather)
-      weatherApi.setDevMode({ mode: 'offline' })
+      // Cache enabled, no mock - should use API as fallback
+      weatherApi.setConfig({ cacheEnabled: true, mockAPIRequests: false })
 
       const result = await weatherApi.getCurrentWeather(testLocation)
 
@@ -117,13 +188,13 @@ describe('Weather API Service', () => {
       expect(mockedAxios.get).not.toHaveBeenCalled()
     })
 
-    it('throws error when no cached data in offline mode', async () => {
+    it('throws error when no cached data and no fallback available', async () => {
       mockedCache.getCurrentWeather.mockReturnValue(null)
-      weatherApi.setDevMode({ mode: 'offline' })
+      // Disable both cache and mock, but somehow also disable API (edge case)
+      weatherApi.setConfig({ cacheEnabled: false, mockAPIRequests: false })
+      mockedAxiosGet.mockRejectedValue(new Error('API unavailable'))
 
-      await expect(weatherApi.getCurrentWeather(testLocation)).rejects.toThrow(
-        'No cached data available in offline mode'
-      )
+      await expect(weatherApi.getCurrentWeather(testLocation)).rejects.toThrow('API unavailable')
     })
   })
 
@@ -149,6 +220,8 @@ describe('Weather API Service', () => {
 
       mockedAxiosGet.mockResolvedValue(mockApiResponse)
       mockedCache.getDailyForecast.mockReturnValue(null)
+      // Force API mode for this test with caching enabled
+      weatherApi.setConfig({ cacheEnabled: true, mockAPIRequests: false })
 
       const result = await weatherApi.getDailyForecast(TEST_LOCATIONS.CHICAGO)
 
@@ -189,7 +262,7 @@ describe('Weather API Service', () => {
       ]
 
       mockedCache.getDailyForecast.mockReturnValue(cachedForecast)
-      weatherApi.setDevMode({ mode: 'cache-first' })
+      weatherApi.setConfig({ cacheEnabled: true, mockAPIRequests: false })
 
       const result = await weatherApi.getDailyForecast(TEST_LOCATIONS.CHICAGO)
 
@@ -197,8 +270,12 @@ describe('Weather API Service', () => {
       expect(mockedAxiosGet).not.toHaveBeenCalled()
     })
 
-    it('returns mock daily forecast in mock mode', async () => {
-      weatherApi.setDevMode({ mode: 'mock', mockScenarioId: 'normal-chicago' })
+    it('returns mock daily forecast when mockAPIRequests is true', async () => {
+      weatherApi.setConfig({
+        cacheEnabled: false,
+        mockAPIRequests: true,
+        mockScenarioId: 'normal-chicago'
+      })
 
       const result = await weatherApi.getDailyForecast(TEST_LOCATIONS.CHICAGO)
 
@@ -237,6 +314,8 @@ describe('Weather API Service', () => {
 
       mockedAxiosGet.mockResolvedValue(mockApiResponse)
       mockedCache.getHourlyForecastForDay.mockReturnValue(null)
+      // Force API mode for this test with caching enabled
+      weatherApi.setConfig({ cacheEnabled: true, mockAPIRequests: false })
 
       const result = await weatherApi.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, targetDate)
 
@@ -275,7 +354,7 @@ describe('Weather API Service', () => {
       }))
 
       mockedCache.getHourlyForecastForDay.mockReturnValue(cachedHourly)
-      weatherApi.setDevMode({ mode: 'cache-first' })
+      weatherApi.setConfig({ cacheEnabled: true, mockAPIRequests: false })
 
       const result = await weatherApi.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, targetDate)
 
@@ -283,8 +362,12 @@ describe('Weather API Service', () => {
       expect(mockedAxiosGet).not.toHaveBeenCalled()
     })
 
-    it('returns mock hourly forecast for day in mock mode', async () => {
-      weatherApi.setDevMode({ mode: 'mock', mockScenarioId: 'extreme-heat' })
+    it('returns mock hourly forecast for day when mockAPIRequests is true', async () => {
+      weatherApi.setConfig({
+        cacheEnabled: false,
+        mockAPIRequests: true,
+        mockScenarioId: 'extreme-heat'
+      })
 
       const result = await weatherApi.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, targetDate)
 
@@ -318,6 +401,8 @@ describe('Weather API Service', () => {
 
       mockedAxiosGet.mockResolvedValue(mockApiResponse)
       mockedCache.getHourlyForecastForDay.mockReturnValue(null)
+      // Force API mode for this test with caching enabled
+      weatherApi.setConfig({ cacheEnabled: true, mockAPIRequests: false })
 
       const result = await weatherApi.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, '2022-01-02')
 
@@ -326,6 +411,60 @@ describe('Weather API Service', () => {
 
       // First hour should be midnight of Jan 2
       expect(result[0].timestamp).toBe(1641081600) // Jan 2 00:00:00 UTC (2022-01-02T00:00:00Z)
+    })
+  })
+
+  describe('Configuration Management', () => {
+    it('allows setting custom configuration', () => {
+      // First verify the default configuration
+      const defaultConfig = weatherApi.getCurrentConfig()
+      expect(defaultConfig.cacheEnabled).toBe(true) // Default should be true
+      expect(defaultConfig.mockAPIRequests).toBe(true) // Default should be true in test env
+      expect(defaultConfig.mockScenarioId).toBe('normal-chicago') // Default scenario
+      expect(defaultConfig.enableLogging).toBe(true) // Default should be true in test env
+
+      // Now set a completely different configuration
+      const newConfig = {
+        cacheEnabled: false, // opposite of default
+        mockAPIRequests: false, // opposite of default
+        mockScenarioId: 'extreme-heat', // different from default
+        enableLogging: false // opposite of default
+      }
+
+      weatherApi.setConfig(newConfig)
+      const currentConfig = weatherApi.getCurrentConfig()
+
+      expect(currentConfig.cacheEnabled).toBe(false)
+      expect(currentConfig.mockAPIRequests).toBe(false)
+      expect(currentConfig.mockScenarioId).toBe('extreme-heat')
+      expect(currentConfig.enableLogging).toBe(false)
+    })
+
+    it('allows partial configuration updates', () => {
+      // Set initial known state
+      weatherApi.setConfig({ cacheEnabled: true, mockAPIRequests: false, enableLogging: true })
+      const initialConfig = weatherApi.getCurrentConfig()
+      expect(initialConfig.cacheEnabled).toBe(true)
+      expect(initialConfig.mockAPIRequests).toBe(false)
+      expect(initialConfig.enableLogging).toBe(true)
+
+      // Update only mockAPIRequests, verify others remain unchanged
+      weatherApi.setConfig({ mockAPIRequests: true })
+
+      const config = weatherApi.getCurrentConfig()
+      expect(config.cacheEnabled).toBe(true) // Should remain unchanged
+      expect(config.mockAPIRequests).toBe(true) // Should be updated
+      expect(config.enableLogging).toBe(true) // Should remain unchanged
+    })
+
+    it('provides current configuration', () => {
+      const config = weatherApi.getCurrentConfig()
+
+      expect(config).toHaveProperty('cacheEnabled')
+      expect(config).toHaveProperty('mockAPIRequests')
+      expect(config).toHaveProperty('enableLogging')
+      expect(typeof config.cacheEnabled).toBe('boolean')
+      expect(typeof config.mockAPIRequests).toBe('boolean')
     })
   })
 
@@ -348,7 +487,7 @@ describe('Weather API Service', () => {
       // For now, we'll test API error handling instead
       mockedCache.getCurrentWeather.mockReturnValue(null)
       mockedAxiosGet.mockRejectedValue(new Error('API Error'))
-      weatherApi.setDevMode({ mode: 'production' })
+      weatherApi.setConfig({ cacheEnabled: false, mockAPIRequests: false })
 
       await expect(weatherApi.getCurrentWeather(testLocation)).rejects.toThrow('API Error')
     })
@@ -356,7 +495,7 @@ describe('Weather API Service', () => {
     it('throws error when daily forecast API fails', async () => {
       mockedCache.getDailyForecast.mockReturnValue(null)
       mockedAxiosGet.mockRejectedValue(new Error('API Error'))
-      weatherApi.setDevMode({ mode: 'production' })
+      weatherApi.setConfig({ cacheEnabled: false, mockAPIRequests: false })
 
       await expect(weatherApi.getDailyForecast(TEST_LOCATIONS.CHICAGO)).rejects.toThrow('API Error')
     })
@@ -364,7 +503,7 @@ describe('Weather API Service', () => {
     it('throws error when hourly forecast for day API fails', async () => {
       mockedCache.getHourlyForecastForDay.mockReturnValue(null)
       mockedAxiosGet.mockRejectedValue(new Error('Network Error'))
-      weatherApi.setDevMode({ mode: 'production' })
+      weatherApi.setConfig({ cacheEnabled: false, mockAPIRequests: false })
 
       await expect(
         weatherApi.getHourlyForecastForDay(TEST_LOCATIONS.CHICAGO, '2022-01-01')

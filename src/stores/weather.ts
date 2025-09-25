@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Location, CurrentWeather, HourlyForecast, DailyForecast } from '../types/weather'
-import { WeatherApiService } from '../services/weatherApi'
+import { weatherApiService } from '../services/weatherApi'
 
 export const useWeatherStore = defineStore('weather', () => {
   const currentLocation = ref<Location>({
@@ -17,9 +17,6 @@ export const useWeatherStore = defineStore('weather', () => {
   const hourlyLoadingByDate = ref<Record<string, boolean>>({})
   const isLoading = ref(false)
   const error = ref<string | null>(null)
-
-  // Weather API service instance
-  const weatherApi = new WeatherApiService()
 
   const setLocation = (location: Location) => {
     currentLocation.value = location
@@ -49,7 +46,7 @@ export const useWeatherStore = defineStore('weather', () => {
     try {
       setLoading(true)
       setError(null)
-      const forecast = await weatherApi.getDailyForecast(currentLocation.value)
+      const forecast = await weatherApiService.getDailyForecast(currentLocation.value)
       setDailyForecast(forecast)
     } catch (err) {
       setError('Failed to load daily forecast')
@@ -61,7 +58,7 @@ export const useWeatherStore = defineStore('weather', () => {
   const loadHourlyForecastForDay = async (date: string) => {
     try {
       hourlyLoadingByDate.value[date] = true
-      const forecast = await weatherApi.getHourlyForecastForDay(currentLocation.value, date)
+      const forecast = await weatherApiService.getHourlyForecastForDay(currentLocation.value, date)
       hourlyForecastByDate.value[date] = forecast
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load hourly forecast for day')
@@ -110,7 +107,7 @@ export const useWeatherStore = defineStore('weather', () => {
     hourlyLoadingByDate,
     isLoading,
     error,
-    weatherApi,
+    weatherApiService,
     setLocation,
     setLocationAndClear,
     setCurrentWeather,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getMockScenario, getRandomScenario, mockScenarios } from '../../services/mockData'
+import { getMockScenario, mockScenarios } from '../../services/mockData'
 
 describe('Mock Data Service', () => {
   it('returns all available scenarios', () => {
@@ -24,13 +24,6 @@ describe('Mock Data Service', () => {
   it('returns null for non-existent scenario ID', () => {
     const scenario = getMockScenario('non-existent')
     expect(scenario).toBeNull()
-  })
-
-  it('returns random scenario', () => {
-    const scenario = getRandomScenario()
-
-    expect(scenario).toBeDefined()
-    expect(mockScenarios).toContain(scenario)
   })
 
   describe('Scenario Data Integrity', () => {

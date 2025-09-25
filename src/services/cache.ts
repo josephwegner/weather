@@ -113,3 +113,4 @@ class CacheService {
 }
 
 export const cacheService = new CacheService()
+export { CacheService }

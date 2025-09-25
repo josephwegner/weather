@@ -133,7 +133,7 @@ describe('Weather Store', () => {
 
     // Mock the weatherApi service
     const mockGetHourlyForecastForDay = vi.fn().mockResolvedValue(mockHourlyData)
-    store.weatherApi.getHourlyForecastForDay = mockGetHourlyForecastForDay
+    store.weatherApiService.getHourlyForecastForDay = mockGetHourlyForecastForDay
 
     await store.loadHourlyForecastForDay('2022-01-01')
 
@@ -147,7 +147,7 @@ describe('Weather Store', () => {
 
     // Mock the weatherApi service to throw error
     const mockGetHourlyForecastForDay = vi.fn().mockRejectedValue(new Error(errorMessage))
-    store.weatherApi.getHourlyForecastForDay = mockGetHourlyForecastForDay
+    store.weatherApiService.getHourlyForecastForDay = mockGetHourlyForecastForDay
 
     // Expect the method to throw the error
     await expect(store.loadHourlyForecastForDay('2022-01-01')).rejects.toThrow('API Error')
@@ -159,7 +159,7 @@ describe('Weather Store', () => {
 
     // Mock the weatherApi service
     const mockGetDailyForecast = vi.fn().mockResolvedValue(mockDailyData)
-    store.weatherApi.getDailyForecast = mockGetDailyForecast
+    store.weatherApiService.getDailyForecast = mockGetDailyForecast
 
     await store.loadDailyForecast()
 
@@ -175,7 +175,7 @@ describe('Weather Store', () => {
 
     // Mock the weatherApi service to throw error
     const mockGetDailyForecast = vi.fn().mockRejectedValue(new Error(errorMessage))
-    store.weatherApi.getDailyForecast = mockGetDailyForecast
+    store.weatherApiService.getDailyForecast = mockGetDailyForecast
 
     await store.loadDailyForecast()
 
