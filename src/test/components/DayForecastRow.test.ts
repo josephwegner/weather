@@ -33,8 +33,14 @@ describe('DayForecastRow Component', () => {
     humidity: 65,
     precipitationProbability: 10,
     precipitationIntensity: 0,
+    precipitationType: 'rain',
     windSpeed: 8,
     windDirection: 180,
+    windGust: 12,
+    pressure: 1013,
+    uvIndex: 3,
+    cloudCover: 25,
+    visibility: 10,
     description: 'sunny',
     icon: '01d'
   }))
@@ -229,5 +235,111 @@ describe('DayForecastRow Component', () => {
     expect(firstRowCells[0].text()).toMatch(/\d{1,2}\s?(AM|PM)/i) // Time format
     expect(firstRowCells[2].text()).toContain('60°') // Temperature
     expect(firstRowCells[3].text()).toContain('10%') // Precipitation
+  })
+
+  it('displays metric toggle component when expanded', async () => {
+    mockStore.hourlyForecastByDate = {
+      '2022-01-01': sampleHourlyForecast.slice(0, 3)
+    }
+
+    const wrapper = mount(DayForecastRow, {
+      props: { dayForecast: sampleDayForecast }
+    })
+
+    await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+    const metricToggle = wrapper.find('.metric-toggle')
+    expect(metricToggle.exists()).toBe(true)
+  })
+
+  it('displays temperature metric by default', async () => {
+    mockStore.hourlyForecastByDate = {
+      '2022-01-01': sampleHourlyForecast.slice(0, 1)
+    }
+
+    const wrapper = mount(DayForecastRow, {
+      props: { dayForecast: sampleDayForecast }
+    })
+
+    await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+    const firstRowCells = wrapper.find('[data-testid="hourly-row"]').findAll('td')
+    expect(firstRowCells[2].text()).toContain('60°')
+
+    const tempButton = wrapper.find('.metric-temperature')
+    expect(tempButton.classes()).toContain('selected')
+  })
+
+  it('displays feels-like metric when selected', async () => {
+    mockStore.hourlyForecastByDate = {
+      '2022-01-01': sampleHourlyForecast.slice(0, 1)
+    }
+
+    const wrapper = mount(DayForecastRow, {
+      props: { dayForecast: sampleDayForecast }
+    })
+
+    await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+    // Directly set the selected metric in component state
+    wrapper.vm.selectedMetric = 'feelsLike'
+    await wrapper.vm.$nextTick()
+
+    const cells = wrapper.find('[data-testid="hourly-row"]').findAll('td')
+    expect(cells[2].text()).toContain('62°') // feelsLike value from sample data
+  })
+
+  it('displays humidity metric with correct units', async () => {
+    mockStore.hourlyForecastByDate = {
+      '2022-01-01': sampleHourlyForecast.slice(0, 1)
+    }
+
+    const wrapper = mount(DayForecastRow, {
+      props: { dayForecast: sampleDayForecast }
+    })
+
+    await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+    wrapper.vm.selectedMetric = 'humidity'
+    await wrapper.vm.$nextTick()
+
+    const cells = wrapper.find('[data-testid="hourly-row"]').findAll('td')
+    expect(cells[2].text()).toContain('65%')
+  })
+
+  it('displays wind speed metric with correct units', async () => {
+    mockStore.hourlyForecastByDate = {
+      '2022-01-01': sampleHourlyForecast.slice(0, 1)
+    }
+
+    const wrapper = mount(DayForecastRow, {
+      props: { dayForecast: sampleDayForecast }
+    })
+
+    await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+    wrapper.vm.selectedMetric = 'windSpeed'
+    await wrapper.vm.$nextTick()
+
+    const cells = wrapper.find('[data-testid="hourly-row"]').findAll('td')
+    expect(cells[2].text()).toContain('8')
+  })
+
+  it('displays precipitation probability metric with correct units', async () => {
+    mockStore.hourlyForecastByDate = {
+      '2022-01-01': sampleHourlyForecast.slice(0, 1)
+    }
+
+    const wrapper = mount(DayForecastRow, {
+      props: { dayForecast: sampleDayForecast }
+    })
+
+    await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+    wrapper.vm.selectedMetric = 'precipitationProbability'
+    await wrapper.vm.$nextTick()
+
+    const cells = wrapper.find('[data-testid="hourly-row"]').findAll('td')
+    expect(cells[2].text()).toContain('10%')
   })
 })

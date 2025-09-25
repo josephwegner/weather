@@ -327,8 +327,14 @@ describe('Weather API Service', () => {
         humidity: 70,
         precipitationProbability: 20,
         precipitationIntensity: 0,
+        precipitationType: undefined,
         windSpeed: 8,
         windDirection: 180,
+        windGust: 0,
+        pressure: 0,
+        uvIndex: 0,
+        cloudCover: 0,
+        visibility: 0,
         description: 'partly cloudy',
         icon: '02d'
       })

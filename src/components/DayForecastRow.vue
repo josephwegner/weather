@@ -55,11 +55,17 @@
               <td class="hour-weather">
                 <img :src="getHourlyIconUrl(hour.icon)" :alt="hour.description" />
               </td>
-              <td class="hour-temp">{{ Math.round(hour.temperature) }}°</td>
+              <td class="hour-metric">{{ getMetricValue(hour) }}</td>
               <td class="hour-precip">{{ hour.precipitationProbability }}%</td>
             </tr>
           </tbody>
         </table>
+
+        <MetricToggle
+          :selected-metric="selectedMetric"
+          :available-metrics="availableMetrics"
+          @metric-change="handleMetricChange"
+        />
       </div>
 
       <div v-else class="no-hourly-data">No hourly data available for this day</div>
@@ -69,8 +75,9 @@
 
 <script setup lang="ts">
   import { ref, computed } from 'vue'
-  import type { DailyForecast } from '../types/weather'
+  import type { DailyForecast, HourlyForecast } from '../types/weather'
   import { useWeatherStore } from '../stores/weather'
+  import MetricToggle, { type MetricType } from './MetricToggle.vue'
 
   interface Props {
     dayForecast: DailyForecast
@@ -81,6 +88,21 @@
 
   const isExpanded = ref(false)
   const hourlyError = ref<string | null>(null)
+  const selectedMetric = ref<MetricType>('temperature')
+
+  const availableMetrics = [
+    { key: 'temperature' as MetricType, label: 'TEMP', unit: '°F' },
+    { key: 'feelsLike' as MetricType, label: 'FEELS-LIKE', unit: '°F' },
+    { key: 'precipitationProbability' as MetricType, label: 'PRECIP PROB', unit: '%' },
+    { key: 'precipitationIntensity' as MetricType, label: 'PRECIP', unit: 'in' },
+    { key: 'humidity' as MetricType, label: 'HUMIDITY', unit: '%' },
+    { key: 'windSpeed' as MetricType, label: 'WIND', unit: 'mph' },
+    { key: 'windGust' as MetricType, label: 'GUST', unit: 'mph' },
+    { key: 'pressure' as MetricType, label: 'PRESSURE', unit: 'mb' },
+    { key: 'uvIndex' as MetricType, label: 'UV INDEX', unit: '' },
+    { key: 'cloudCover' as MetricType, label: 'CLOUDS', unit: '%' },
+    { key: 'visibility' as MetricType, label: 'VISIBILITY', unit: 'mi' }
+  ]
 
   const dayName = computed(() => {
     const date = new Date(props.dayForecast.timestamp * 1000)
@@ -138,6 +160,49 @@
 
   const getHourlyIconUrl = (icon: string) => {
     return `https://openweathermap.org/img/w/${icon}.png`
+  }
+
+  const handleMetricChange = (metric: MetricType) => {
+    selectedMetric.value = metric
+  }
+
+  const getMetricValue = (hour: HourlyForecast): string => {
+    const metric = selectedMetric.value
+    let value: number | string
+
+    switch (metric) {
+      case 'temperature':
+        value = Math.round(hour.temperature)
+        return `${value}°`
+      case 'feelsLike':
+        value = Math.round(hour.feelsLike)
+        return `${value}°`
+      case 'precipitationProbability':
+        return `${hour.precipitationProbability}%`
+      case 'precipitationIntensity':
+        value = hour.precipitationIntensity.toFixed(2)
+        return `${value}"`
+      case 'humidity':
+        return `${hour.humidity}%`
+      case 'windSpeed':
+        value = Math.round(hour.windSpeed)
+        return `${value} mph`
+      case 'windGust':
+        value = Math.round(hour.windGust)
+        return `${value} mph`
+      case 'pressure':
+        value = Math.round(hour.pressure)
+        return `${value} mb`
+      case 'uvIndex':
+        return `${hour.uvIndex}`
+      case 'cloudCover':
+        return `${hour.cloudCover}%`
+      case 'visibility':
+        value = hour.visibility.toFixed(1)
+        return `${value} mi`
+      default:
+        return `${Math.round(hour.temperature)}°`
+    }
   }
 </script>
 
@@ -311,7 +376,7 @@
     vertical-align: middle;
   }
 
-  .hour-temp {
+  .hour-metric {
     font-weight: 600;
     font-size: 0.9rem;
     color: white;

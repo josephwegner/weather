@@ -203,8 +203,14 @@ export class WeatherApiService {
           humidity: hour.humidity,
           precipitationProbability: Math.round(hour.precipprob || 0),
           precipitationIntensity: hour.precip || 0,
-          windSpeed: Math.round(hour.windspeed),
-          windDirection: hour.winddir,
+          precipitationType: hour.preciptype,
+          windSpeed: Math.round(hour.windspeed || 0),
+          windDirection: hour.winddir || 0,
+          windGust: Math.round(hour.windgust || 0),
+          pressure: Math.round(hour.pressure || 0),
+          uvIndex: hour.uvindex || 0,
+          cloudCover: hour.cloudcover || 0,
+          visibility: hour.visibility || 0,
           description: hour.conditions.toLowerCase(),
           icon: this.mapVisualCrossingIcon(hour.icon)
         }

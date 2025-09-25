@@ -31,18 +31,29 @@ export const mockScenarios: MockScenario[] = [
       icon: '02d',
       timestamp: now
     },
-    hourlyForecast: Array.from({ length: 24 }, (_, i) => ({
-      timestamp: now + i * 3600,
-      temperature: 72 + Math.sin(i * 0.3) * 10,
-      feelsLike: 75 + Math.sin(i * 0.3) * 10,
-      humidity: 65 + Math.cos(i * 0.2) * 15,
-      precipitationProbability: Math.round(Math.max(0, Math.sin(i * 0.4) * 30)),
-      precipitationIntensity: 0,
-      windSpeed: 8 + Math.cos(i * 0.1) * 5,
-      windDirection: 180 + Math.sin(i * 0.1) * 45,
-      description: i < 12 ? 'partly cloudy' : 'clear sky',
-      icon: i < 12 ? '02d' : '01n'
-    })),
+    hourlyForecast: Array.from({ length: 24 }, (_, i) => {
+      const temp = 72 + Math.sin(i * 0.3) * 10
+      const precipProb = Math.round(Math.max(0, Math.sin(i * 0.4) * 30))
+      const hasRain = precipProb > 20
+      return {
+        timestamp: now + i * 3600,
+        temperature: temp,
+        feelsLike: temp + 3 + Math.sin(i * 0.2) * 2,
+        humidity: Math.round(Math.max(30, Math.min(90, 65 + Math.cos(i * 0.2) * 15))),
+        precipitationProbability: precipProb,
+        precipitationIntensity: hasRain ? Math.random() * 0.5 : 0,
+        precipitationType: hasRain ? 'rain' : undefined,
+        windSpeed: Math.round(8 + Math.cos(i * 0.1) * 5),
+        windDirection: Math.round(180 + Math.sin(i * 0.1) * 45),
+        windGust: Math.round(12 + Math.cos(i * 0.15) * 8),
+        pressure: Math.round(1013 + Math.sin(i * 0.05) * 5),
+        uvIndex: Math.max(0, Math.round(6 * Math.sin(((i - 6) * Math.PI) / 12))), // Peak at noon
+        cloudCover: Math.round(Math.max(0, Math.min(100, 40 + Math.sin(i * 0.3) * 30))),
+        visibility: Math.round(Math.max(5, 15 - Math.abs(Math.sin(i * 0.2)) * 5)),
+        description: i < 12 ? 'partly cloudy' : 'clear sky',
+        icon: i < 12 ? '02d' : '01n'
+      }
+    }),
     dailyForecast: Array.from({ length: 7 }, (_, i) => ({
       date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
       timestamp: now + i * 86400,
@@ -79,18 +90,27 @@ export const mockScenarios: MockScenario[] = [
       icon: '01d',
       timestamp: now
     },
-    hourlyForecast: Array.from({ length: 24 }, (_, i) => ({
-      timestamp: now + i * 3600,
-      temperature: 110 + Math.sin(i * 0.26) * 8,
-      feelsLike: 120 + Math.sin(i * 0.26) * 10,
-      humidity: 8 + Math.abs(Math.sin(i * 0.3) * 5),
-      precipitationProbability: 0,
-      precipitationIntensity: 0,
-      windSpeed: 12 + Math.cos(i * 0.2) * 8,
-      windDirection: 225 + Math.sin(i * 0.15) * 30,
-      description: 'clear sky',
-      icon: i >= 6 && i <= 18 ? '01d' : '01n'
-    })),
+    hourlyForecast: Array.from({ length: 24 }, (_, i) => {
+      const temp = 110 + Math.sin(i * 0.26) * 8
+      return {
+        timestamp: now + i * 3600,
+        temperature: temp,
+        feelsLike: temp + 10 + Math.sin(i * 0.26) * 2,
+        humidity: Math.round(8 + Math.abs(Math.sin(i * 0.3) * 5)),
+        precipitationProbability: 0,
+        precipitationIntensity: 0,
+        precipitationType: undefined,
+        windSpeed: Math.round(12 + Math.cos(i * 0.2) * 8),
+        windDirection: Math.round(225 + Math.sin(i * 0.15) * 30),
+        windGust: Math.round(20 + Math.cos(i * 0.1) * 10),
+        pressure: Math.round(1008 + Math.sin(i * 0.08) * 3),
+        uvIndex: Math.max(0, Math.round(10 * Math.sin(((i - 6) * Math.PI) / 12))), // High UV in desert
+        cloudCover: Math.round(Math.max(0, Math.min(20, 5 + Math.sin(i * 0.2) * 10))), // Very low clouds
+        visibility: Math.round(Math.max(3, 8 - Math.abs(Math.sin(i * 0.3)) * 3)), // Reduced by heat haze
+        description: 'clear sky',
+        icon: i >= 6 && i <= 18 ? '01d' : '01n'
+      }
+    }),
     dailyForecast: Array.from({ length: 7 }, (_, i) => ({
       date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
       timestamp: now + i * 86400,
@@ -124,18 +144,27 @@ export const mockScenarios: MockScenario[] = [
       icon: '13d',
       timestamp: now
     },
-    hourlyForecast: Array.from({ length: 24 }, (_, i) => ({
-      timestamp: now + i * 3600,
-      temperature: -20 + Math.sin(i * 0.1) * 8,
-      feelsLike: -40 + Math.sin(i * 0.1) * 12,
-      humidity: 75 + Math.cos(i * 0.2) * 10,
-      precipitationProbability: 85,
-      precipitationIntensity: 0.5,
-      windSpeed: 20 + Math.cos(i * 0.15) * 10,
-      windDirection: 350 + Math.sin(i * 0.1) * 20,
-      description: 'heavy snow',
-      icon: '13d'
-    })),
+    hourlyForecast: Array.from({ length: 24 }, (_, i) => {
+      const temp = -20 + Math.sin(i * 0.1) * 8
+      return {
+        timestamp: now + i * 3600,
+        temperature: temp,
+        feelsLike: temp - 20 + Math.sin(i * 0.1) * 5,
+        humidity: Math.round(75 + Math.cos(i * 0.2) * 10),
+        precipitationProbability: 85,
+        precipitationIntensity: 0.3 + Math.random() * 0.4,
+        precipitationType: 'snow',
+        windSpeed: Math.round(20 + Math.cos(i * 0.15) * 10),
+        windDirection: Math.round(350 + Math.sin(i * 0.1) * 20),
+        windGust: Math.round(35 + Math.cos(i * 0.12) * 15),
+        pressure: Math.round(1035 + Math.sin(i * 0.06) * 8),
+        uvIndex: 0, // No UV in winter/snow
+        cloudCover: Math.round(90 + Math.sin(i * 0.1) * 10), // Heavy overcast
+        visibility: Math.round(Math.max(0.5, 3 - Math.abs(Math.sin(i * 0.4)) * 2)), // Poor visibility in snow
+        description: 'heavy snow',
+        icon: '13d'
+      }
+    }),
     dailyForecast: Array.from({ length: 7 }, (_, i) => ({
       date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
       timestamp: now + i * 86400,
@@ -169,18 +198,27 @@ export const mockScenarios: MockScenario[] = [
       icon: '10d',
       timestamp: now
     },
-    hourlyForecast: Array.from({ length: 24 }, (_, i) => ({
-      timestamp: now + i * 3600,
-      temperature: 76 + Math.sin(i * 0.2) * 4,
-      feelsLike: 85 + Math.sin(i * 0.2) * 6,
-      humidity: 92 + Math.cos(i * 0.3) * 5,
-      precipitationProbability: 100,
-      precipitationIntensity: 15 + Math.cos(i * 0.4) * 8,
-      windSpeed: 75 + Math.sin(i * 0.25) * 15,
-      windDirection: 90 + Math.sin(i * 0.1) * 60,
-      description: 'heavy intensity rain',
-      icon: '10d'
-    })),
+    hourlyForecast: Array.from({ length: 24 }, (_, i) => {
+      const temp = 76 + Math.sin(i * 0.2) * 4
+      return {
+        timestamp: now + i * 3600,
+        temperature: temp,
+        feelsLike: temp + 9 + Math.sin(i * 0.2) * 2,
+        humidity: Math.round(92 + Math.cos(i * 0.3) * 5),
+        precipitationProbability: 100,
+        precipitationIntensity: 1.5 + Math.cos(i * 0.4) * 0.8, // Heavy rain in inches
+        precipitationType: 'rain',
+        windSpeed: Math.round(75 + Math.sin(i * 0.25) * 15),
+        windDirection: Math.round(90 + Math.sin(i * 0.1) * 60),
+        windGust: Math.round(100 + Math.sin(i * 0.2) * 20), // Hurricane force gusts
+        pressure: Math.round(950 + Math.sin(i * 0.08) * 10), // Very low pressure
+        uvIndex: 0, // No UV during hurricane
+        cloudCover: 100, // Complete overcast
+        visibility: Math.round(Math.max(0.25, 1.5 - Math.abs(Math.sin(i * 0.5)) * 1)), // Very poor visibility
+        description: 'heavy intensity rain',
+        icon: '10d'
+      }
+    }),
     dailyForecast: Array.from({ length: 7 }, (_, i) => ({
       date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
       timestamp: now + i * 86400,
@@ -221,8 +259,14 @@ export const mockScenarios: MockScenario[] = [
       humidity: 0,
       precipitationProbability: 0,
       precipitationIntensity: 0,
+      precipitationType: undefined,
       windSpeed: 0,
       windDirection: 0,
+      windGust: 0,
+      pressure: 0,
+      uvIndex: 0,
+      cloudCover: 0,
+      visibility: 0,
       description: '',
       icon: ''
     })),

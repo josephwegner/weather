@@ -25,8 +25,14 @@ export interface HourlyForecast {
   humidity: number
   precipitationProbability: number
   precipitationIntensity: number
+  precipitationType?: string
   windSpeed: number
   windDirection: number
+  windGust: number
+  pressure: number
+  uvIndex: number
+  cloudCover: number
+  visibility: number
   description: string
   icon: string
 }
