@@ -49,7 +49,7 @@
       weatherStore.setLoading(true)
       weatherStore.setError(null)
 
-      const currentWeather = await weatherStore.weatherApi.getCurrentWeather(
+      const currentWeather = await weatherStore.weatherApiService.getCurrentWeather(
         weatherStore.currentLocation
       )
       weatherStore.setCurrentWeather(currentWeather)
