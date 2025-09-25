@@ -50,7 +50,7 @@ describe('HourlyForecastRow Component', () => {
     expect(timeCell.text()).toMatch(/\d{1,2}\s?(AM|PM)/i)
   })
 
-  it('renders weather icon with correct attributes', () => {
+  it('applies correct colored left border based on weather condition', () => {
     const wrapper = mount(HourlyForecastRow, {
       props: {
         hourData: sampleHourlyData,
@@ -58,10 +58,10 @@ describe('HourlyForecastRow Component', () => {
       }
     })
 
-    const weatherImg = wrapper.find('.hour-weather img')
-    expect(weatherImg.exists()).toBe(true)
-    expect(weatherImg.attributes('src')).toContain('02d')
-    expect(weatherImg.attributes('alt')).toBe('partly cloudy')
+    const row = wrapper.find('.hourly-row')
+    // '02d' should be cloudy (#6b7280 = rgb(107, 114, 128))
+    expect(row.attributes('style')).toContain('border-left-color: rgb(107, 114, 128)')
+    expect(row.attributes('style')).toContain('border-left-width: 0.5rem')
   })
 
   it('displays correct metric values for all available metrics', () => {
@@ -78,7 +78,7 @@ describe('HourlyForecastRow Component', () => {
     })
   })
 
-  it('renders with correct CSS classes', () => {
+  it('renders 3-column layout with time, condition, and metric', () => {
     const wrapper = mount(HourlyForecastRow, {
       props: {
         hourData: sampleHourlyData,
@@ -88,8 +88,12 @@ describe('HourlyForecastRow Component', () => {
 
     expect(wrapper.classes()).toContain('hourly-row')
     expect(wrapper.find('.hour-time').exists()).toBe(true)
-    expect(wrapper.find('.hour-weather').exists()).toBe(true)
+    expect(wrapper.find('.hour-condition').exists()).toBe(true)
     expect(wrapper.find('.hour-metric').exists()).toBe(true)
+
+    // Should have exactly 3 div elements (time, condition, metric)
+    const columns = wrapper.findAll('.hourly-row > div')
+    expect(columns).toHaveLength(3)
   })
 
   it('handles zero values correctly', () => {
@@ -125,5 +129,77 @@ describe('HourlyForecastRow Component', () => {
     const timeCell = wrapper.find('.hour-time')
     // Just verify it has the AM/PM format, not specific time
     expect(timeCell.text()).toMatch(/\d{1,2}\s?(AM|PM)/i)
+  })
+
+  it('displays different border colors for different weather conditions', () => {
+    const weatherConditions = [
+      { icon: '01d', expectedRgb: 'rgb(245, 158, 11)', category: 'clear' }, // #f59e0b
+      { icon: '02d', expectedRgb: 'rgb(107, 114, 128)', category: 'cloudy' }, // #6b7280
+      { icon: '09d', expectedRgb: 'rgb(74, 144, 226)', category: 'rain' }, // #4a90e2
+      { icon: '11d', expectedRgb: 'rgb(139, 92, 246)', category: 'storm' }, // #8b5cf6
+      { icon: '13d', expectedRgb: 'rgb(226, 232, 240)', category: 'snow' } // #e2e8f0
+    ]
+
+    weatherConditions.forEach(({ icon, expectedRgb }) => {
+      const testData = { ...sampleHourlyData, icon }
+      const wrapper = mount(HourlyForecastRow, {
+        props: {
+          hourData: testData,
+          selectedMetric: 'temperature' as MetricType
+        }
+      })
+
+      const row = wrapper.find('.hourly-row')
+      expect(row.attributes('style')).toContain(`border-left-color: ${expectedRgb}`)
+    })
+  })
+
+  it('displays condition label when showConditionLabel is true', () => {
+    const wrapper = mount(HourlyForecastRow, {
+      props: {
+        hourData: sampleHourlyData,
+        selectedMetric: 'temperature' as MetricType,
+        showConditionLabel: true
+      }
+    })
+
+    const conditionCell = wrapper.find('.hour-condition')
+    expect(conditionCell.text()).toBe('Partly Cloudy')
+  })
+
+  it('hides condition label when showConditionLabel is false or undefined', () => {
+    const wrapper = mount(HourlyForecastRow, {
+      props: {
+        hourData: sampleHourlyData,
+        selectedMetric: 'temperature' as MetricType,
+        showConditionLabel: false
+      }
+    })
+
+    const conditionCell = wrapper.find('.hour-condition')
+    expect(conditionCell.text()).toBe('')
+  })
+
+  it('properly formats different weather descriptions', () => {
+    const testCases = [
+      { description: 'light rain', expected: 'Light Rain' },
+      { description: 'heavy snow', expected: 'Heavy Snow' },
+      { description: 'clear sky', expected: 'Clear Sky' },
+      { description: 'overcast clouds', expected: 'Overcast Clouds' }
+    ]
+
+    testCases.forEach(({ description, expected }) => {
+      const testData = { ...sampleHourlyData, description }
+      const wrapper = mount(HourlyForecastRow, {
+        props: {
+          hourData: testData,
+          selectedMetric: 'temperature' as MetricType,
+          showConditionLabel: true
+        }
+      })
+
+      const conditionCell = wrapper.find('.hour-condition')
+      expect(conditionCell.text()).toBe(expected)
+    })
   })
 })

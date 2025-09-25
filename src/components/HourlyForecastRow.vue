@@ -1,23 +1,57 @@
 <template>
-  <tr class="hourly-row">
-    <td class="hour-time">{{ formatHour(hourData.timestamp) }}</td>
-    <td class="hour-weather">
-      <img :src="getHourlyIconUrl(hourData.icon)" :alt="hourData.description" />
-    </td>
-    <td class="hour-metric">{{ getMetricValue(hourData) }}</td>
-  </tr>
+  <div
+    class="hourly-row"
+    :style="{
+      borderLeftColor: weatherBorderColor,
+      borderLeftWidth: '.5rem',
+      borderLeftStyle: 'solid'
+    }"
+    :aria-label="accessibilityLabel"
+    role="row"
+  >
+    <div class="hour-time" role="cell">{{ formatHour(hourData.timestamp) }}</div>
+    <div class="hour-condition" role="cell" v-if="showConditionLabel && conditionLabel">
+      {{ conditionLabel }}
+    </div>
+    <div class="hour-condition" role="cell" v-else></div>
+    <div class="hour-metric" role="cell">{{ getMetricValue(hourData) }}</div>
+  </div>
 </template>
 
 <script setup lang="ts">
+  import { computed } from 'vue'
   import type { HourlyForecast } from '../types/weather'
   import type { MetricType } from '../types/metrics'
+  import {
+    getWeatherColor,
+    getWeatherCategory,
+    getConditionLabel
+  } from '../utils/weatherConditions'
 
   interface Props {
     hourData: HourlyForecast
     selectedMetric: MetricType
+    showConditionLabel?: boolean
   }
 
   const props = defineProps<Props>()
+
+  const weatherBorderColor = computed(() => getWeatherColor(props.hourData.icon))
+
+  const conditionLabel = computed(() => {
+    if (!props.showConditionLabel) return ''
+    const category = getWeatherCategory(props.hourData.icon)
+    return getConditionLabel(props.hourData.description, category)
+  })
+
+  const accessibilityLabel = computed(() => {
+    const time = formatHour(props.hourData.timestamp)
+    const metric = getMetricValue(props.hourData)
+    const condition = conditionLabel.value || 'Weather unchanged'
+    const category = getWeatherCategory(props.hourData.icon)
+
+    return `${time}, ${condition}, ${category} conditions, ${metric}`
+  })
 
   const formatHour = (timestamp: number) => {
     const date = new Date(timestamp * 1000)
@@ -26,10 +60,6 @@
       hour12: true,
       timeZone: 'UTC'
     })
-  }
-
-  const getHourlyIconUrl = (icon: string) => {
-    return `https://openweathermap.org/img/w/${icon}.png`
   }
 
   const getMetricValue = (hour: HourlyForecast): string => {
@@ -78,6 +108,12 @@
 </script>
 
 <style scoped>
+  .hourly-row {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgb(71, 85, 105);
+  }
+
   .hourly-row:hover {
     background: rgba(71, 85, 105, 0.3);
   }
@@ -86,43 +122,45 @@
     font-size: 0.85rem;
     color: white;
     font-weight: 500;
-    padding: 0.75rem;
-    border-bottom: 1px solid rgb(71, 85, 105);
-    vertical-align: middle;
+    padding: 0.75rem 0.5rem 0.75rem 0.75rem;
+    flex-shrink: 0;
+    min-width: fit-content;
   }
 
-  .hour-weather {
-    padding: 0.75rem;
-    border-bottom: 1px solid rgb(71, 85, 105);
-    vertical-align: middle;
-  }
-
-  .hour-weather img {
-    width: 24px;
-    height: 24px;
-    vertical-align: middle;
+  .hour-condition {
+    font-size: 0.75rem;
+    color: rgb(148, 163, 184);
+    font-weight: 400;
+    padding: 0.75rem 0.75rem 0.5rem 0;
+    flex: 1;
+    min-width: 0;
+    font-style: italic;
   }
 
   .hour-metric {
     font-weight: 600;
     font-size: 0.9rem;
     color: white;
-    padding: 0.75rem;
-    border-bottom: 1px solid rgb(71, 85, 105);
-    vertical-align: middle;
+    padding: 0.75rem 0.75rem 0 0.75rem;
+    flex-shrink: 0;
+    text-align: right;
+    min-width: fit-content;
   }
 
   @media (max-width: 768px) {
-    .hour-time,
-    .hour-weather,
-    .hour-metric {
+    .hour-time {
       padding: 0.5rem;
       font-size: 0.8rem;
     }
 
-    .hour-weather img {
-      width: 20px;
-      height: 20px;
+    .hour-condition {
+      padding: 0.5rem;
+      font-size: 0.7rem;
+    }
+
+    .hour-metric {
+      padding: 0.5rem;
+      font-size: 0.8rem;
     }
   }
 </style>

@@ -135,8 +135,8 @@ describe('DayForecastRow Component', () => {
 
     await wrapper.find('[data-testid="day-row-button"]').trigger('click')
 
-    // Check that table and rows exist
-    expect(wrapper.find('[data-testid="hourly-table"]').exists()).toBe(true)
+    // Check that list and rows exist
+    expect(wrapper.find('[data-testid="hourly-list"]').exists()).toBe(true)
     const hourlyRows = wrapper.findAll('.hourly-row')
     expect(hourlyRows.length).toBeGreaterThan(0)
   })
@@ -220,12 +220,12 @@ describe('DayForecastRow Component', () => {
 
     await wrapper.find('[data-testid="day-row-button"]').trigger('click')
 
-    // Check table structure exists
-    const table = wrapper.find('[data-testid="hourly-table"]')
-    expect(table.exists()).toBe(true)
+    // Check list structure exists
+    const list = wrapper.find('[data-testid="hourly-list"]')
+    expect(list.exists()).toBe(true)
 
     // Check that HourlyForecastRow components are rendered
-    const rows = table.findAll('.hourly-row')
+    const rows = list.findAll('.hourly-row')
     expect(rows).toHaveLength(3)
   })
 
@@ -281,5 +281,96 @@ describe('DayForecastRow Component', () => {
     const humidityButton = wrapper.find('.metric-humidity')
     expect(humidityButton.classes()).toContain('selected')
     expect(tempButton.classes()).not.toContain('selected')
+  })
+
+  it('shows condition labels only when weather conditions change', async () => {
+    // Create test data with changing weather conditions
+    const testHourlyData = [
+      { timestamp: 1641081600, icon: '01d', description: 'clear sky', temperature: 70 }, // Clear
+      { timestamp: 1641085200, icon: '01d', description: 'clear sky', temperature: 72 }, // Clear (same)
+      { timestamp: 1641088800, icon: '02d', description: 'partly cloudy', temperature: 74 }, // Cloudy (change)
+      { timestamp: 1641092400, icon: '10d', description: 'light rain', temperature: 68 }, // Rain (change)
+      { timestamp: 1641096000, icon: '10d', description: 'light rain', temperature: 66 } // Rain (same)
+    ]
+
+    // Mock the hourly data in the store
+    mockStore.hourlyForecastByDate = {
+      [sampleDayForecast.date]: testHourlyData
+    }
+
+    const wrapper = mount(DayForecastRow, {
+      props: { dayForecast: sampleDayForecast },
+      global: { plugins: [createPinia()] }
+    })
+
+    // Expand the row
+    await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+    // Get all hourly forecast rows
+    const hourlyRows = wrapper.findAll('.hourly-row')
+    expect(hourlyRows).toHaveLength(5)
+
+    // Check condition labels - should appear on 1st, 3rd, and 4th rows (condition changes)
+    const expectedLabels = [
+      { index: 0, shouldShow: true, expectedText: 'Clear Sky' }, // First row always shows
+      { index: 1, shouldShow: false }, // Same as previous (clear)
+      { index: 2, shouldShow: true, expectedText: 'Partly Cloudy' }, // Changed to cloudy
+      { index: 3, shouldShow: true, expectedText: 'Light Rain' }, // Changed to rain
+      { index: 4, shouldShow: false } // Same as previous (rain)
+    ]
+
+    expectedLabels.forEach(({ index, shouldShow, expectedText }) => {
+      const row = hourlyRows[index]
+      const conditionCell = row.find('.hour-condition')
+
+      if (shouldShow) {
+        expect(conditionCell.text()).toBe(expectedText)
+        expect(conditionCell.text()).not.toBe('')
+      } else {
+        expect(conditionCell.text()).toBe('')
+      }
+    })
+  })
+
+  it('properly calculates accessibility labels for screen readers', async () => {
+    const testHourlyData = [
+      {
+        timestamp: 1641081600,
+        icon: '01d',
+        description: 'clear sky',
+        temperature: 70,
+        feelsLike: 72,
+        humidity: 65,
+        precipitationProbability: 0,
+        precipitationIntensity: 0,
+        windSpeed: 5,
+        windDirection: 180,
+        windGust: 8,
+        pressure: 1013,
+        uvIndex: 3,
+        cloudCover: 10,
+        visibility: 10
+      }
+    ]
+
+    mockStore.hourlyForecastByDate = {
+      [sampleDayForecast.date]: testHourlyData
+    }
+
+    const wrapper = mount(DayForecastRow, {
+      props: { dayForecast: sampleDayForecast },
+      global: { plugins: [createPinia()] }
+    })
+
+    await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+    const hourlyRow = wrapper.find('.hourly-row')
+    const ariaLabel = hourlyRow.attributes('aria-label')
+
+    // Should include time, condition, category, and metric value
+    expect(ariaLabel).toContain('12 AM') // Time
+    expect(ariaLabel).toContain('Clear Sky') // Condition
+    expect(ariaLabel).toContain('clear conditions') // Category
+    expect(ariaLabel).toContain('70°') // Temperature metric
   })
 })

@@ -44,17 +44,21 @@
           {{ hourlyError }}
         </div>
 
-        <div v-else-if="hourlyData" class="hourly-forecast">
-          <table class="hourly-table" data-testid="hourly-table">
-            <tbody>
-              <HourlyForecastRow
-                v-for="hour in hourlyData"
-                :key="hour.timestamp"
-                :hour-data="hour"
-                :selected-metric="selectedMetric"
-              />
-            </tbody>
-          </table>
+        <div v-else-if="hourlyDataWithConditionLabels" class="hourly-forecast">
+          <div
+            class="hourly-list"
+            data-testid="hourly-list"
+            role="table"
+            aria-label="Hourly weather forecast"
+          >
+            <HourlyForecastRow
+              v-for="hour in hourlyDataWithConditionLabels"
+              :key="hour.timestamp"
+              :hour-data="hour"
+              :selected-metric="selectedMetric"
+              :show-condition-label="hour.showConditionLabel"
+            />
+          </div>
 
           <MetricToggle
             :selected-metric="selectedMetric"
@@ -76,6 +80,7 @@
   import type { DailyForecast } from '../types/weather'
   import type { MetricType, MetricOption } from '../types/metrics'
   import { useWeatherStore } from '../stores/weather'
+  import { getWeatherCategory } from '../utils/weatherConditions'
   import MetricToggle from './MetricToggle.vue'
   import HourlyForecastRow from './HourlyForecastRow.vue'
 
@@ -130,6 +135,21 @@
 
   const hourlyData = computed(() => {
     return store.hourlyForecastByDate[props.dayForecast.date] || null
+  })
+
+  const hourlyDataWithConditionLabels = computed(() => {
+    if (!hourlyData.value) return null
+
+    return hourlyData.value.map((hour, index) => {
+      const currentCondition = getWeatherCategory(hour.icon)
+      const previousCondition =
+        index > 0 ? getWeatherCategory(hourlyData.value![index - 1].icon) : null
+
+      return {
+        ...hour,
+        showConditionLabel: index === 0 || currentCondition !== previousCondition
+      }
+    })
   })
 
   const isLoadingHourly = computed(() => {
@@ -277,44 +297,28 @@
     border-radius: 4px;
   }
 
-  .hourly-forecast {
-    padding-top: 0.5rem;
-  }
-
   .hourly-forecast h4 {
     margin: 0 0 1rem 0;
     color: white;
     font-size: 1rem;
   }
 
-  .hourly-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: rgb(51, 65, 85);
-    border-radius: 4px;
-    overflow: hidden;
+  .hourly-forecast {
     max-height: 300px;
-    display: block;
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding: 0 1rem;
+    padding-top: 0.5rem;
   }
 
-  .hourly-table::-webkit-scrollbar {
+  .hourly-forecast::-webkit-scrollbar {
     display: none;
   }
 
-  .hourly-table tbody {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-  }
-
-  .hourly-table td {
-    padding: 0;
-    border: none;
-    vertical-align: middle;
+  .hourly-list {
+    background: rgb(51, 65, 85);
+    border-radius: 4px;
+    overflow: hidden;
   }
 
   .no-hourly-data {

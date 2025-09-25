@@ -3,12 +3,13 @@ import { getMockScenario, mockScenarios } from '../../services/mockData'
 
 describe('Mock Data Service', () => {
   it('returns all available scenarios', () => {
-    expect(mockScenarios).toHaveLength(5)
+    expect(mockScenarios).toHaveLength(6)
     expect(mockScenarios[0].id).toBe('normal-chicago')
     expect(mockScenarios[1].id).toBe('extreme-heat')
     expect(mockScenarios[2].id).toBe('extreme-cold')
     expect(mockScenarios[3].id).toBe('hurricane')
-    expect(mockScenarios[4].id).toBe('missing-data')
+    expect(mockScenarios[4].id).toBe('diverse-weather')
+    expect(mockScenarios[5].id).toBe('missing-data')
   })
 
   it('gets specific scenario by ID', () => {

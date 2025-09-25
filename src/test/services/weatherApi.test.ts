@@ -483,7 +483,7 @@ describe('Weather API Service', () => {
     it('returns list of available scenarios', () => {
       const scenarios = weatherApi.getAvailableScenarios()
 
-      expect(scenarios).toHaveLength(5)
+      expect(scenarios).toHaveLength(6)
       expect(scenarios[0]).toEqual({
         id: 'normal-chicago',
         name: 'Normal Chicago Weather',
