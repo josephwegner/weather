@@ -45,19 +45,21 @@
         </div>
 
         <div v-else-if="hourlyDataWithConditionLabels" class="hourly-forecast">
-          <div
-            class="hourly-list"
-            data-testid="hourly-list"
-            role="table"
-            aria-label="Hourly weather forecast"
-          >
-            <HourlyForecastRow
-              v-for="hour in hourlyDataWithConditionLabels"
-              :key="hour.timestamp"
-              :hour-data="hour"
-              :selected-metric="selectedMetric"
-              :show-condition-label="hour.showConditionLabel"
-            />
+          <div class="hourly-content">
+            <div
+              class="hourly-list"
+              data-testid="hourly-list"
+              role="table"
+              aria-label="Hourly weather forecast"
+            >
+              <HourlyForecastRow
+                v-for="hour in hourlyDataWithConditionLabels"
+                :key="hour.timestamp"
+                :hour-data="hour"
+                :selected-metric="selectedMetric"
+                :show-condition-label="hour.showConditionLabel"
+              />
+            </div>
           </div>
 
           <MetricToggle
@@ -304,14 +306,20 @@
   }
 
   .hourly-forecast {
-    max-height: 300px;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    display: flex;
+    flex-direction: column;
+    height: 300px;
     padding-top: 0.5rem;
   }
 
-  .hourly-forecast::-webkit-scrollbar {
+  .hourly-content {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .hourly-content::-webkit-scrollbar {
     display: none;
   }
 
