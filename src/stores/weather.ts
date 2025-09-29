@@ -2,13 +2,19 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Location, CurrentWeather, HourlyForecast, DailyForecast } from '../types/weather'
 import { weatherApiService } from '../services/weatherApi'
+import { locationStorageService } from '../services/locationStorageService'
 
 export const useWeatherStore = defineStore('weather', () => {
-  const currentLocation = ref<Location>({
+  // Initialize location from storage or use Chicago default
+  const defaultLocation: Location = {
     lat: 41.8781, // Chicago default
     lng: -87.6298,
     name: 'Chicago, IL'
-  })
+  }
+
+  const currentLocation = ref<Location>(
+    locationStorageService.getCurrentLocation() || defaultLocation
+  )
 
   const currentWeather = ref<CurrentWeather | null>(null)
   const hourlyForecast = ref<HourlyForecast[]>([])
@@ -20,6 +26,10 @@ export const useWeatherStore = defineStore('weather', () => {
 
   const setLocation = (location: Location) => {
     currentLocation.value = location
+    // Persist location to storage
+    locationStorageService.setCurrentLocation(location)
+    // Add to recent locations
+    locationStorageService.addRecentLocation(location)
   }
 
   const setCurrentWeather = (weather: CurrentWeather) => {

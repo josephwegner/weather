@@ -1,4 +1,10 @@
-import type { Location, CurrentWeather, HourlyForecast, DailyForecast } from '../types/weather'
+import type {
+  Location,
+  CurrentWeather,
+  HourlyForecast,
+  DailyForecast,
+  RecentLocation
+} from '../types/weather'
 
 export const TEST_LOCATIONS = {
   CHICAGO: {
@@ -17,6 +23,18 @@ export const TEST_LOCATIONS = {
     lat: 36.1699,
     lng: -115.1398,
     name: 'Las Vegas, NV'
+  } as Location,
+
+  LONDON: {
+    lat: 51.5074,
+    lng: -0.1278,
+    name: 'London, UK'
+  } as Location,
+
+  TOKYO: {
+    lat: 35.6762,
+    lng: 139.6503,
+    name: 'Tokyo, Japan'
   } as Location
 }
 
@@ -62,4 +80,36 @@ export const TEST_WEATHER_DATA = {
     description: 'partly cloudy',
     icon: '02d'
   } as DailyForecast
+}
+
+export const TEST_RECENT_LOCATIONS = {
+  CHICAGO_RECENT: {
+    ...TEST_LOCATIONS.CHICAGO,
+    lastUsed: 1640995200000, // Jan 1, 2022
+    usageCount: 5
+  } as RecentLocation,
+
+  NEW_YORK_RECENT: {
+    ...TEST_LOCATIONS.NEW_YORK,
+    lastUsed: 1640908800000, // Dec 31, 2021
+    usageCount: 3
+  } as RecentLocation,
+
+  LAS_VEGAS_RECENT: {
+    ...TEST_LOCATIONS.LAS_VEGAS,
+    lastUsed: 1640822400000, // Dec 30, 2021
+    usageCount: 1
+  } as RecentLocation,
+
+  LONDON_RECENT: {
+    ...TEST_LOCATIONS.LONDON,
+    lastUsed: 1640736000000, // Dec 29, 2021
+    usageCount: 2
+  } as RecentLocation,
+
+  TOKYO_RECENT: {
+    ...TEST_LOCATIONS.TOKYO,
+    lastUsed: 1640649600000, // Dec 28, 2021
+    usageCount: 1
+  } as RecentLocation
 }

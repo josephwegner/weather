@@ -3,6 +3,28 @@
     <div class="container mx-auto px-4 py-8">
       <main>
         <div class="max-w-md mx-auto">
+          <!-- Location Search Section -->
+          <div class="bg-slate-800 rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-medium mb-4 text-slate-200">Location</h2>
+            <div class="flex items-center justify-between mb-4">
+              <div class="text-white font-medium">{{ weatherStore.currentLocation.name }}</div>
+              <button
+                @click="toggleLocationSearch"
+                class="text-blue-400 hover:text-blue-300 text-sm"
+              >
+                {{ showLocationSearch ? 'Cancel' : 'Change' }}
+              </button>
+            </div>
+
+            <LocationSearch
+              v-if="showLocationSearch"
+              v-model="selectedLocation"
+              @locationSelected="onLocationSelected"
+              class="mt-4"
+            />
+          </div>
+
+          <!-- Current Weather Section -->
           <div class="bg-slate-800 rounded-lg p-6 mb-6">
             <div class="text-center">
               <div v-if="weatherStore.isLoading" class="text-6xl font-thin mb-2">--°</div>
@@ -24,6 +46,7 @@
             </div>
           </div>
 
+          <!-- Forecast Section -->
           <div class="bg-slate-800 rounded-lg p-6">
             <WeeklyForecast />
           </div>
@@ -34,11 +57,15 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted } from 'vue'
+  import { ref, onMounted } from 'vue'
+  import type { Location } from './types/weather'
   import { useWeatherStore } from './stores/weather'
   import WeeklyForecast from './components/WeeklyForecast.vue'
+  import LocationSearch from './components/LocationSearch.vue'
 
   const weatherStore = useWeatherStore()
+  const showLocationSearch = ref(false)
+  const selectedLocation = ref<Location | null>(null)
 
   const fetchWeatherData = async () => {
     try {
@@ -54,6 +81,21 @@
     } finally {
       weatherStore.setLoading(false)
     }
+  }
+
+  const toggleLocationSearch = () => {
+    showLocationSearch.value = !showLocationSearch.value
+  }
+
+  const onLocationSelected = (location: Location) => {
+    // Update the weather store with new location
+    weatherStore.setLocationAndClear(location)
+
+    // Hide location search
+    showLocationSearch.value = false
+
+    // Fetch weather data for new location
+    fetchWeatherData()
   }
 
   onMounted(() => {
