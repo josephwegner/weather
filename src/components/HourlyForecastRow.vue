@@ -1,5 +1,5 @@
 <template>
-  <div
+  <tr
     class="hourly-row"
     :style="{
       borderLeftColor: weatherBorderColor,
@@ -7,15 +7,16 @@
       borderLeftStyle: 'solid'
     }"
     :aria-label="accessibilityLabel"
-    role="row"
   >
-    <div class="hour-time" role="cell">{{ formatHour(hourData.timestamp) }}</div>
-    <div class="hour-condition" role="cell" v-if="showConditionLabel && conditionLabel">
+    <td class="hour-time">{{ formatHour(hourData.timestamp) }}</td>
+    <td class="hour-condition" v-if="showConditionLabel && conditionLabel">
       {{ conditionLabel }}
-    </div>
-    <div class="hour-condition" role="cell" v-else></div>
-    <div class="hour-metric" role="cell">{{ getMetricValue(hourData) }}</div>
-  </div>
+    </td>
+    <td class="hour-condition" v-else></td>
+    <td class="hour-metric">
+      <span class="hour-metric-value" :style="{ position: 'relative', left: `${(relativeValueOffset * 100 || 0)}%` }">{{ getMetricValue(hourData) }}</span>
+    </td>
+  </tr>
 </template>
 
 <script setup lang="ts">
@@ -31,7 +32,8 @@
   interface Props {
     hourData: HourlyForecast
     selectedMetric: MetricType
-    showConditionLabel?: boolean
+    showConditionLabel?: boolean,
+    relativeValueOffset?: number
   }
 
   const props = defineProps<Props>()
@@ -109,8 +111,6 @@
 
 <style scoped>
   .hourly-row {
-    display: flex;
-    align-items: center;
     border-bottom: 1px solid rgb(71, 85, 105);
   }
 
@@ -123,8 +123,7 @@
     color: white;
     font-weight: 500;
     padding: 0.75rem 0.5rem 0.75rem 0.75rem;
-    flex-shrink: 0;
-    min-width: fit-content;
+    white-space: nowrap;
   }
 
   .hour-condition {
@@ -132,35 +131,41 @@
     color: rgb(148, 163, 184);
     font-weight: 400;
     padding: 0.75rem 0.75rem 0.5rem 0;
-    flex: 1;
-    min-width: 0;
     font-style: italic;
+    white-space: nowrap;
   }
 
   .hour-metric {
     font-weight: 600;
     font-size: 0.9rem;
     color: white;
-    padding: 0.75rem 0.75rem 0 0.75rem;
-    flex-shrink: 0;
-    text-align: right;
-    min-width: fit-content;
+    padding: 0.75rem 2.5rem 0 0.75rem;
+    width: 100%;
+    position: relative;
+  }
+
+  .hour-metric-value {
+    position: relative;
+    right: 0;
   }
 
   @media (max-width: 768px) {
     .hour-time {
       padding: 0.5rem;
       font-size: 0.8rem;
+      white-space: nowrap;
     }
 
     .hour-condition {
       padding: 0.5rem;
       font-size: 0.7rem;
+      white-space: nowrap;
     }
 
     .hour-metric {
       padding: 0.5rem;
       font-size: 0.8rem;
+      width: 100%;
     }
   }
 </style>

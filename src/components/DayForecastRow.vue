@@ -46,20 +46,22 @@
 
         <div v-else-if="hourlyDataWithConditionLabels" class="hourly-forecast">
           <div class="hourly-content">
-            <div
+            <table
               class="hourly-list"
               data-testid="hourly-list"
-              role="table"
               aria-label="Hourly weather forecast"
             >
-              <HourlyForecastRow
-                v-for="hour in hourlyDataWithConditionLabels"
-                :key="hour.timestamp"
-                :hour-data="hour"
-                :selected-metric="selectedMetric"
-                :show-condition-label="hour.showConditionLabel"
-              />
-            </div>
+              <tbody>
+                <HourlyForecastRow
+                  v-for="hour in hourlyDataWithConditionLabels"
+                  :key="hour.timestamp"
+                  :hour-data="hour"
+                  :selected-metric="selectedMetric"
+                  :show-condition-label="hour.showConditionLabel"
+                  :relative-value-offset="relativeValueOffsets[hour.timestamp] || 0"
+                />
+              </tbody>
+            </table>
           </div>
 
           <MetricToggle
@@ -170,6 +172,36 @@
       }
     }
   }
+
+  const relativeValueOffsets = computed(() => {
+    if (!hourlyDataWithConditionLabels.value) return {}
+
+    let minTemp = Infinity
+    let maxTemp = -Infinity
+    const offsets: Record<number, number> = {}
+
+    // Find min and max temperatures
+    hourlyDataWithConditionLabels.value.forEach((hour) => {
+      if (hour.temperature < minTemp) {
+        minTemp = hour.temperature
+      }
+      if (hour.temperature > maxTemp) {
+        maxTemp = hour.temperature
+      }
+    })
+
+    // Calculate relative offsets for each hour
+    hourlyDataWithConditionLabels.value.forEach((hour) => {
+      const range = maxTemp - minTemp
+      if (range === 0) {
+        offsets[hour.timestamp] = 0
+      } else {
+        offsets[hour.timestamp] = (hour.temperature - minTemp) / range
+      }
+    })
+
+    return offsets
+  })
 
   const handleMetricChange = (metric: MetricType) => {
     selectedMetric.value = metric
@@ -327,6 +359,8 @@
     background: rgb(51, 65, 85);
     border-radius: 4px;
     overflow: hidden;
+    width: 100%;
+    border-collapse: collapse;
   }
 
   .no-hourly-data {

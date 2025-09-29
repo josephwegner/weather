@@ -91,8 +91,8 @@ describe('HourlyForecastRow Component', () => {
     expect(wrapper.find('.hour-condition').exists()).toBe(true)
     expect(wrapper.find('.hour-metric').exists()).toBe(true)
 
-    // Should have exactly 3 div elements (time, condition, metric)
-    const columns = wrapper.findAll('.hourly-row > div')
+    // Should have exactly 3 td elements (time, condition, metric)
+    const columns = wrapper.findAll('.hourly-row > td')
     expect(columns).toHaveLength(3)
   })
 
