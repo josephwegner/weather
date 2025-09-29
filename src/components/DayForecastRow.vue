@@ -7,18 +7,36 @@
       :aria-expanded="isExpanded"
       :aria-controls="`hourly-${dayForecast.date}`"
     >
-      <div class="day-name">{{ dayName }}</div>
-
-      <div class="weather-icon" data-testid="weather-icon">
-        <img :src="iconUrl" :alt="dayForecast.description" />
+      <div class="left-content">
+        <div class="day-info">
+          <div class="day-name">{{ dayName }}</div>
+          <div class="precipitation">
+            <span class="water-drop">💧</span>
+            <span class="precip-percentage"
+              >{{ Math.round(dayForecast.precipitationProbability) }}%</span
+            >
+          </div>
+        </div>
+        <img :src="iconUrl" :alt="dayForecast.description" class="weather-icon" />
       </div>
 
-      <div class="temperature-range">
+      <div class="temperature-range" v-if="!temperatureRangePosition">
         <span class="low">{{ Math.round(dayForecast.temperatureLow) }}°</span>
         <span class="high">{{ Math.round(dayForecast.temperatureHigh) }}°</span>
       </div>
 
-      <div class="precipitation-prob">{{ dayForecast.precipitationProbability }}%</div>
+      <div class="temperature-range-visual" v-else>
+        <div
+          class="range-container"
+          :style="{
+            left: `${temperatureRangePosition.lowPosition * 100}%`,
+            minWidth: `${temperatureRangePosition.rangeWidth * 100}%`
+          }"
+        >
+          <span class="temp-value temp-low">{{ Math.round(dayForecast.temperatureLow) }}°</span>
+          <span class="temp-value temp-high">{{ Math.round(dayForecast.temperatureHigh) }}°</span>
+        </div>
+      </div>
     </button>
 
     <transition name="accordion">
@@ -87,9 +105,11 @@
   import { getWeatherCategory } from '../utils/weatherConditions'
   import MetricToggle from './MetricToggle.vue'
   import HourlyForecastRow from './HourlyForecastRow.vue'
+  import type { TemperatureRangePosition } from '../utils/temperatureRange'
 
   interface Props {
     dayForecast: DailyForecast
+    temperatureRangePosition?: TemperatureRangePosition
   }
 
   const props = defineProps<Props>()
@@ -115,22 +135,7 @@
 
   const dayName = computed(() => {
     const date = new Date(props.dayForecast.timestamp * 1000)
-    const today = new Date()
-    const tomorrow = new Date(today)
-    tomorrow.setDate(today.getDate() + 1)
-
-    // Compare dates by converting to YYYY-MM-DD strings to avoid time zone issues
-    const dateStr = date.toISOString().split('T')[0]
-    const todayStr = today.toISOString().split('T')[0]
-    const tomorrowStr = tomorrow.toISOString().split('T')[0]
-
-    if (dateStr === todayStr) {
-      return 'Today'
-    } else if (dateStr === tomorrowStr) {
-      return 'Tomorrow'
-    } else {
-      return date.toLocaleDateString('en-US', { weekday: 'long' })
-    }
+    return date.toLocaleDateString('en-US', { weekday: 'short' })
   })
 
   const iconUrl = computed(() => {
@@ -227,7 +232,7 @@
 
   .day-summary {
     display: grid;
-    grid-template-columns: 1fr auto 1fr auto;
+    grid-template-columns: minmax(100px, 1fr) 2fr;
     align-items: center;
     gap: 1rem;
     padding: 0.5rem 1rem;
@@ -239,6 +244,44 @@
     background: transparent;
   }
 
+  .left-content {
+    display: grid;
+    grid-template-columns: auto 40px;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .day-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .precipitation {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .water-drop {
+    font-size: 0.8rem;
+  }
+
+  .precip-percentage {
+    font-size: 0.8rem;
+    color: #60a5fa;
+    font-weight: 500;
+  }
+
+  .weather-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    justify-self: center;
+  }
+
   .day-summary:hover {
     background-color: rgba(71, 85, 105, 0.3);
   }
@@ -248,15 +291,6 @@
     font-size: 0.9rem;
     color: white;
     text-align: left;
-  }
-
-  .weather-icon {
-    justify-self: center;
-  }
-
-  .weather-icon img {
-    width: 28px;
-    height: 28px;
   }
 
   .temperature-range {
@@ -277,11 +311,42 @@
     color: white;
   }
 
-  .precipitation-prob {
+  .temperature-range-visual {
+    position: relative;
+    height: 32px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .range-container {
+    position: absolute;
+    height: 24px;
+    background-color: rgb(51, 65, 85);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    min-width: 60px;
+    transition: all 0.2s ease;
+  }
+
+  .temp-value {
     font-size: 0.85rem;
-    color: #4a90e2;
-    text-align: center;
-    min-width: 40px;
+    font-weight: 500;
+    color: white;
+    white-space: nowrap;
+  }
+
+  .temp-low {
+    color: rgb(203, 213, 225);
+    margin-right: 8px;
+  }
+
+  .temp-high {
+    color: white;
+    font-weight: 600;
   }
 
   .hourly-section {

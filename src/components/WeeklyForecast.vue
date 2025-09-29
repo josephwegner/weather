@@ -15,6 +15,7 @@
         v-for="day in store.dailyForecast.slice(0, 7)"
         :key="day.date"
         :dayForecast="day"
+        :temperatureRangePosition="temperatureRangePositions[day.date]"
         data-testid="day-forecast-row"
       />
     </div>
@@ -22,11 +23,19 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted } from 'vue'
+  import { onMounted, computed } from 'vue'
   import { useWeatherStore } from '../stores/weather'
   import DayForecastRow from './DayForecastRow.vue'
+  import { calculateTemperatureRangePositions } from '../utils/temperatureRange'
 
   const store = useWeatherStore()
+
+  const temperatureRangePositions = computed(() => {
+    if (!store.dailyForecast || store.dailyForecast.length === 0) {
+      return {}
+    }
+    return calculateTemperatureRangePositions(store.dailyForecast.slice(0, 7))
+  })
 
   onMounted(() => {
     store.loadDailyForecast()

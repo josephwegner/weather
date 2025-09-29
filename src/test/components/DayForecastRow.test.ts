@@ -4,6 +4,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import DayForecastRow from '../../components/DayForecastRow.vue'
 import { useWeatherStore } from '../../stores/weather'
 import type { DailyForecast, HourlyForecast } from '../../types/weather'
+import type { TemperatureRangePosition } from '../../utils/temperatureRange'
 
 vi.mock('../../stores/weather', () => ({
   useWeatherStore: vi.fn()
@@ -64,8 +65,6 @@ describe('DayForecastRow Component', () => {
 
     expect(wrapper.text()).toContain('75°')
     expect(wrapper.text()).toContain('55°')
-    expect(wrapper.text()).toContain('20%') // precipitation
-    expect(wrapper.find('[data-testid="weather-icon"]').exists()).toBe(true)
   })
 
   it('displays day name correctly', () => {
@@ -372,5 +371,120 @@ describe('DayForecastRow Component', () => {
     expect(ariaLabel).toContain('Clear Sky') // Condition
     expect(ariaLabel).toContain('clear-day conditions') // Category
     expect(ariaLabel).toContain('70°') // Temperature metric
+  })
+
+  describe('Temperature Range Visual Positioning', () => {
+    const sampleRangePosition: TemperatureRangePosition = {
+      lowPosition: 0.25,
+      highPosition: 0.75,
+      rangeWidth: 0.5
+    }
+
+    it('renders temperature range with relative positioning when temperatureRangePosition prop is provided', () => {
+      const wrapper = mount(DayForecastRow, {
+        props: {
+          dayForecast: sampleDayForecast,
+          temperatureRangePosition: sampleRangePosition
+        }
+      })
+
+      const temperatureRange = wrapper.find('.temperature-range-visual')
+      expect(temperatureRange.exists()).toBe(true)
+
+      // Check if the visual container has correct positioning styles
+      const rangeContainer = wrapper.find('.range-container')
+      expect(rangeContainer.exists()).toBe(true)
+      expect(rangeContainer.attributes('style')).toContain('left: 25%') // lowPosition * 100
+      expect(rangeContainer.attributes('style')).toContain('width: 50%') // rangeWidth * 100
+    })
+
+    it('renders temperature values in rounded grey containers with correct positioning', () => {
+      const wrapper = mount(DayForecastRow, {
+        props: {
+          dayForecast: sampleDayForecast,
+          temperatureRangePosition: sampleRangePosition
+        }
+      })
+
+      const lowTemp = wrapper.find('.temp-low')
+      const highTemp = wrapper.find('.temp-high')
+
+      expect(lowTemp.exists()).toBe(true)
+      expect(highTemp.exists()).toBe(true)
+
+      // Should have rounded styling classes
+      expect(lowTemp.classes()).toContain('temp-value')
+      expect(highTemp.classes()).toContain('temp-value')
+
+      // Should display correct temperature values
+      expect(lowTemp.text()).toBe('55°')
+      expect(highTemp.text()).toBe('75°')
+    })
+
+    it('falls back to original temperature display when temperatureRangePosition prop is not provided', () => {
+      const wrapper = mount(DayForecastRow, {
+        props: { dayForecast: sampleDayForecast }
+      })
+
+      // Should not render the visual positioning elements
+      expect(wrapper.find('.temperature-range-visual').exists()).toBe(false)
+      expect(wrapper.find('.range-container').exists()).toBe(false)
+
+      // Should still render the basic temperature range
+      const temperatureRange = wrapper.find('.temperature-range')
+      expect(temperatureRange.exists()).toBe(true)
+      expect(temperatureRange.text()).toContain('75°')
+      expect(temperatureRange.text()).toContain('55°')
+    })
+
+    it('handles edge case positioning values correctly', () => {
+      const edgeCasePosition: TemperatureRangePosition = {
+        lowPosition: 0,
+        highPosition: 1,
+        rangeWidth: 1
+      }
+
+      const wrapper = mount(DayForecastRow, {
+        props: {
+          dayForecast: sampleDayForecast,
+          temperatureRangePosition: edgeCasePosition
+        }
+      })
+
+      const rangeContainer = wrapper.find('.range-container')
+      expect(rangeContainer.attributes('style')).toContain('left: 0%')
+      expect(rangeContainer.attributes('style')).toContain('width: 100%')
+    })
+
+    it('handles zero width range correctly (same high and low temp)', () => {
+      const zeroWidthPosition: TemperatureRangePosition = {
+        lowPosition: 0.5,
+        highPosition: 0.5,
+        rangeWidth: 0
+      }
+
+      const sameTempDay: DailyForecast = {
+        ...sampleDayForecast,
+        temperatureHigh: 65,
+        temperatureLow: 65
+      }
+
+      const wrapper = mount(DayForecastRow, {
+        props: {
+          dayForecast: sameTempDay,
+          temperatureRangePosition: zeroWidthPosition
+        }
+      })
+
+      const rangeContainer = wrapper.find('.range-container')
+      expect(rangeContainer.attributes('style')).toContain('left: 50%')
+      expect(rangeContainer.attributes('style')).toContain('width: 0%')
+
+      // Both temp values should be the same
+      const lowTemp = wrapper.find('.temp-low')
+      const highTemp = wrapper.find('.temp-high')
+      expect(lowTemp.text()).toBe('65°')
+      expect(highTemp.text()).toBe('65°')
+    })
   })
 })

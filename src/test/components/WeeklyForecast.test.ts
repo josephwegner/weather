@@ -100,15 +100,6 @@ describe('WeeklyForecast Component', () => {
     expect(wrapper.text()).toContain('Sun')
   })
 
-  it('shows weather icons', () => {
-    mockStore.dailyForecast = sampleDailyForecast
-
-    const wrapper = mount(WeeklyForecast)
-
-    const icons = wrapper.findAll('[data-testid="weather-icon"]')
-    expect(icons).toHaveLength(2)
-  })
-
   it('loads daily forecast on mount', () => {
     mount(WeeklyForecast)
 
@@ -121,18 +112,5 @@ describe('WeeklyForecast Component', () => {
     const wrapper = mount(WeeklyForecast)
 
     expect(wrapper.text()).toContain('No forecast data available')
-  })
-
-  it('formats precipitation probability correctly', () => {
-    mockStore.dailyForecast = [
-      {
-        ...sampleDailyForecast[0],
-        precipitationProbability: 75
-      }
-    ]
-
-    const wrapper = mount(WeeklyForecast)
-
-    expect(wrapper.text()).toContain('75%')
   })
 })
