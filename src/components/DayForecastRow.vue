@@ -181,32 +181,63 @@
   const relativeValueOffsets = computed(() => {
     if (!hourlyDataWithConditionLabels.value) return {}
 
-    let minTemp = Infinity
-    let maxTemp = -Infinity
+    let minValue = Infinity
+    let maxValue = -Infinity
     const offsets: Record<number, number> = {}
 
-    // Find min and max temperatures
+    // Find min and max values for the selected metric
     hourlyDataWithConditionLabels.value.forEach((hour) => {
-      if (hour.temperature < minTemp) {
-        minTemp = hour.temperature
+      const value = getMetricNumericValue(hour, selectedMetric.value)
+      if (value < minValue) {
+        minValue = value
       }
-      if (hour.temperature > maxTemp) {
-        maxTemp = hour.temperature
+      if (value > maxValue) {
+        maxValue = value
       }
     })
 
-    // Calculate relative offsets for each hour
+    // Calculate relative offsets for each hour based on selected metric
     hourlyDataWithConditionLabels.value.forEach((hour) => {
-      const range = maxTemp - minTemp
+      const value = getMetricNumericValue(hour, selectedMetric.value)
+      const range = maxValue - minValue
       if (range === 0) {
         offsets[hour.timestamp] = 0
       } else {
-        offsets[hour.timestamp] = (hour.temperature - minTemp) / range
+        offsets[hour.timestamp] = (value - minValue) / range
       }
     })
 
     return offsets
   })
+
+  const getMetricNumericValue = (hour: any, metric: MetricType): number => {
+    switch (metric) {
+      case 'temperature':
+        return hour.temperature ?? 0
+      case 'feelsLike':
+        return hour.feelsLike ?? 0
+      case 'precipitationProbability':
+        return hour.precipitationProbability ?? 0
+      case 'precipitationIntensity':
+        return hour.precipitationIntensity ?? 0
+      case 'humidity':
+        return hour.humidity ?? 0
+      case 'windSpeed':
+        return hour.windSpeed ?? 0
+      case 'windGust':
+        return hour.windGust ?? 0
+      case 'pressure':
+        return hour.pressure ?? 0
+      case 'uvIndex':
+        return hour.uvIndex ?? 0
+      case 'cloudCover':
+        return hour.cloudCover ?? 0
+      case 'visibility':
+        return hour.visibility ?? 0
+      default:
+        return hour.temperature ?? 0
+    }
+  }
 
   const handleMetricChange = (metric: MetricType) => {
     selectedMetric.value = metric

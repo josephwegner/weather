@@ -373,6 +373,224 @@ describe('DayForecastRow Component', () => {
     expect(ariaLabel).toContain('70°') // Temperature metric
   })
 
+  describe('Metric Relative Positioning', () => {
+    it('recalculates relative value offsets when metric changes', async () => {
+      const testHourlyData = [
+        {
+          timestamp: 1641081600,
+          temperature: 60,
+          humidity: 30,
+          windSpeed: 5,
+          precipitationProbability: 10,
+          feelsLike: 58,
+          precipitationIntensity: 0.1,
+          windGust: 8,
+          pressure: 1010,
+          uvIndex: 2,
+          cloudCover: 20,
+          visibility: 8,
+          icon: '01d',
+          description: 'clear'
+        },
+        {
+          timestamp: 1641085200,
+          temperature: 70,
+          humidity: 80,
+          windSpeed: 15,
+          precipitationProbability: 50,
+          feelsLike: 72,
+          precipitationIntensity: 0.5,
+          windGust: 20,
+          pressure: 1015,
+          uvIndex: 8,
+          cloudCover: 60,
+          visibility: 12,
+          icon: '01d',
+          description: 'clear'
+        },
+        {
+          timestamp: 1641088800,
+          temperature: 80,
+          humidity: 50,
+          windSpeed: 10,
+          precipitationProbability: 30,
+          feelsLike: 82,
+          precipitationIntensity: 0.3,
+          windGust: 14,
+          pressure: 1020,
+          uvIndex: 5,
+          cloudCover: 40,
+          visibility: 10,
+          icon: '01d',
+          description: 'clear'
+        }
+      ]
+
+      mockStore.hourlyForecastByDate = {
+        [sampleDayForecast.date]: testHourlyData
+      }
+
+      const wrapper = mount(DayForecastRow, {
+        props: { dayForecast: sampleDayForecast }
+      })
+
+      await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+      // Get initial relative offsets with temperature metric (default)
+      // Temperature range: 60-80, so relative positions should be 0, 0.5, 1
+      const hourlyRows = wrapper.findAll('.hourly-row')
+      expect(hourlyRows).toHaveLength(3)
+
+      // Check initial temperature-based positioning
+      let metricBars = wrapper.findAll('.metric-bar')
+      expect(metricBars[0].attributes('style')).toContain('width: 4%') // Min value (60), offset 0, shows minimum 4%
+      expect(metricBars[1].attributes('style')).toContain('width: 50%') // Mid value (70), offset 0.5
+      expect(metricBars[2].attributes('style')).toContain('width: 100%') // Max value (80), offset 1
+
+      // Change to humidity metric
+      await wrapper.find('.metric-humidity').trigger('click')
+      await wrapper.vm.$nextTick()
+
+      // Humidity range: 30-80, so relative positions should be 0, 1, 0.4
+      metricBars = wrapper.findAll('.metric-bar')
+      expect(metricBars[0].attributes('style')).toContain('width: 4%') // Min value (30), offset 0, shows minimum 4%
+      expect(metricBars[1].attributes('style')).toContain('width: 100%') // Max value (80), offset 1
+      expect(metricBars[2].attributes('style')).toContain('width: 40%') // Mid value (50), offset 0.4 = (50-30)/(80-30)
+
+      // Change to wind speed metric
+      await wrapper.find('.metric-windSpeed').trigger('click')
+      await wrapper.vm.$nextTick()
+
+      // Wind speed range: 5-15, so relative positions should be 0, 1, 0.5
+      metricBars = wrapper.findAll('.metric-bar')
+      expect(metricBars[0].attributes('style')).toContain('width: 4%') // Min value (5), offset 0, shows minimum 4%
+      expect(metricBars[1].attributes('style')).toContain('width: 100%') // Max value (15), offset 1
+      expect(metricBars[2].attributes('style')).toContain('width: 50%') // Mid value (10), offset 0.5 = (10-5)/(15-5)
+    })
+
+    it('handles identical metric values across all hours correctly', async () => {
+      const testHourlyData = [
+        {
+          timestamp: 1641081600,
+          temperature: 65,
+          humidity: 50,
+          windSpeed: 10,
+          icon: '01d',
+          description: 'clear'
+        },
+        {
+          timestamp: 1641085200,
+          temperature: 65,
+          humidity: 50,
+          windSpeed: 10,
+          icon: '01d',
+          description: 'clear'
+        },
+        {
+          timestamp: 1641088800,
+          temperature: 65,
+          humidity: 50,
+          windSpeed: 10,
+          icon: '01d',
+          description: 'clear'
+        }
+      ]
+
+      mockStore.hourlyForecastByDate = {
+        [sampleDayForecast.date]: testHourlyData
+      }
+
+      const wrapper = mount(DayForecastRow, {
+        props: { dayForecast: sampleDayForecast }
+      })
+
+      await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+      // All temperature values are the same (65), so all offsets should be 0
+      const metricBars = wrapper.findAll('.metric-bar')
+      metricBars.forEach((bar) => {
+        expect(bar.attributes('style')).toContain('width: 4%') // All show minimum 4% when offset is 0
+      })
+
+      // Change to humidity - all values still same (50)
+      await wrapper.find('.metric-humidity').trigger('click')
+      await wrapper.vm.$nextTick()
+
+      // Still should all be minimum width
+      metricBars.forEach((bar) => {
+        expect(bar.attributes('style')).toContain('width: 4%')
+      })
+    })
+
+    it('recalculates positioning for all available metrics', async () => {
+      const testHourlyData = [
+        {
+          timestamp: 1641081600,
+          temperature: 60,
+          feelsLike: 58,
+          humidity: 30,
+          windSpeed: 5,
+          windGust: 8,
+          precipitationProbability: 10,
+          precipitationIntensity: 0.1,
+          pressure: 1010,
+          uvIndex: 2,
+          cloudCover: 20,
+          visibility: 8,
+          icon: '01d',
+          description: 'clear'
+        },
+        {
+          timestamp: 1641085200,
+          temperature: 80,
+          feelsLike: 82,
+          humidity: 80,
+          windSpeed: 15,
+          windGust: 20,
+          precipitationProbability: 50,
+          precipitationIntensity: 0.5,
+          pressure: 1020,
+          uvIndex: 8,
+          cloudCover: 60,
+          visibility: 12,
+          icon: '01d',
+          description: 'clear'
+        }
+      ]
+
+      mockStore.hourlyForecastByDate = {
+        [sampleDayForecast.date]: testHourlyData
+      }
+
+      const wrapper = mount(DayForecastRow, {
+        props: { dayForecast: sampleDayForecast }
+      })
+
+      await wrapper.find('[data-testid="day-row-button"]').trigger('click')
+
+      // Test different metrics and verify positioning changes
+      const metrics = [
+        { selector: '.metric-temperature', range: { min: 60, max: 80 } },
+        { selector: '.metric-humidity', range: { min: 30, max: 80 } },
+        { selector: '.metric-windSpeed', range: { min: 5, max: 15 } },
+        { selector: '.metric-precipitationProbability', range: { min: 10, max: 50 } }
+      ]
+
+      for (const metric of metrics) {
+        await wrapper.find(metric.selector).trigger('click')
+        await wrapper.vm.$nextTick()
+
+        const metricBars = wrapper.findAll('.metric-bar')
+
+        // First bar should be minimum (4% for offset 0)
+        expect(metricBars[0].attributes('style')).toContain('width: 4%')
+
+        // Second bar should be maximum (100% for offset 1)
+        expect(metricBars[1].attributes('style')).toContain('width: 100%')
+      }
+    })
+  })
+
   describe('Temperature Range Visual Positioning', () => {
     const sampleRangePosition: TemperatureRangePosition = {
       lowPosition: 0.25,
