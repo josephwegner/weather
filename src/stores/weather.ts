@@ -96,6 +96,12 @@ export const useWeatherStore = defineStore('weather', () => {
     setLocation(location)
   }
 
+  const setLocationAndReload = async (location: Location) => {
+    clearLocationData()
+    setLocation(location)
+    await loadDailyForecast()
+  }
+
   const next7Days = computed(() => {
     return dailyForecast.value.slice(0, 7)
   })
@@ -120,6 +126,7 @@ export const useWeatherStore = defineStore('weather', () => {
     weatherApiService,
     setLocation,
     setLocationAndClear,
+    setLocationAndReload,
     setCurrentWeather,
     setHourlyForecast,
     setDailyForecast,

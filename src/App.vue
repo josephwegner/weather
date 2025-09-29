@@ -87,14 +87,14 @@
     showLocationSearch.value = !showLocationSearch.value
   }
 
-  const onLocationSelected = (location: Location) => {
-    // Update the weather store with new location
-    weatherStore.setLocationAndClear(location)
+  const onLocationSelected = async (location: Location) => {
+    // Update the weather store with new location and reload daily forecast
+    await weatherStore.setLocationAndReload(location)
 
     // Hide location search
     showLocationSearch.value = false
 
-    // Fetch weather data for new location
+    // Fetch current weather data for new location
     fetchWeatherData()
   }
 

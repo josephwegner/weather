@@ -182,4 +182,69 @@ describe('Weather Store', () => {
     expect(store.error).toBe('Failed to load daily forecast')
     expect(store.isLoading).toBe(false)
   })
+
+  describe('setLocationAndReload', () => {
+    it('clears data, sets location, and reloads daily forecast', async () => {
+      const store = useWeatherStore()
+      const mockDailyData = [TEST_WEATHER_DATA.DAILY_SAMPLE]
+
+      // Set initial data that should be cleared
+      store.setCurrentWeather(TEST_WEATHER_DATA.CURRENT)
+      store.setDailyForecast([TEST_WEATHER_DATA.DAILY_SAMPLE])
+
+      // Mock the weatherApi service
+      const mockGetDailyForecast = vi.fn().mockResolvedValue(mockDailyData)
+      store.weatherApiService.getDailyForecast = mockGetDailyForecast
+
+      const newLocation = { lat: 40.7128, lng: -74.006, name: 'New York, NY' }
+
+      await store.setLocationAndReload(newLocation)
+
+      // Verify location was set
+      expect(store.currentLocation).toEqual(newLocation)
+
+      // Verify daily forecast was loaded for new location
+      expect(mockGetDailyForecast).toHaveBeenCalledWith(newLocation)
+      expect(store.dailyForecast).toEqual(mockDailyData)
+    })
+
+    it('handles errors during daily forecast reload', async () => {
+      const store = useWeatherStore()
+
+      // Mock the weatherApi service to throw error
+      const mockGetDailyForecast = vi.fn().mockRejectedValue(new Error('API Error'))
+      store.weatherApiService.getDailyForecast = mockGetDailyForecast
+
+      const newLocation = { lat: 40.7128, lng: -74.006, name: 'New York, NY' }
+
+      await store.setLocationAndReload(newLocation)
+
+      // Verify location was still set even with error
+      expect(store.currentLocation).toEqual(newLocation)
+
+      // Verify error was handled
+      expect(store.error).toBe('Failed to load daily forecast')
+    })
+
+    it('clears all weather data when changing location', async () => {
+      const store = useWeatherStore()
+
+      // Set initial data
+      store.setCurrentWeather(TEST_WEATHER_DATA.CURRENT)
+      store.setDailyForecast([TEST_WEATHER_DATA.DAILY_SAMPLE])
+      store.hourlyForecastByDate['2022-01-01'] = [TEST_WEATHER_DATA.HOURLY_SAMPLE]
+
+      // Mock the weatherApi service
+      const mockGetDailyForecast = vi.fn().mockResolvedValue([])
+      store.weatherApiService.getDailyForecast = mockGetDailyForecast
+
+      const newLocation = { lat: 40.7128, lng: -74.006, name: 'New York, NY' }
+
+      await store.setLocationAndReload(newLocation)
+
+      // Verify all weather data was cleared initially
+      expect(store.currentWeather).toBeNull()
+      expect(Object.keys(store.hourlyForecastByDate)).toHaveLength(0)
+    })
+  })
 })

@@ -50,6 +50,11 @@ describe('WeeklyForecast Component', () => {
       dailyForecast: [],
       isLoading: false,
       error: null,
+      currentLocation: {
+        lat: 41.8781,
+        lng: -87.6298,
+        name: 'Chicago, IL'
+      },
       loadDailyForecast: vi.fn(),
       loadHourlyForecastForDay: vi.fn()
     }
