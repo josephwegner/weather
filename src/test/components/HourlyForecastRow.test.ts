@@ -154,6 +154,53 @@ describe('HourlyForecastRow Component', () => {
     })
   })
 
+  it('renders metric bar with correct width based on relativeValueOffset', () => {
+    const wrapper = mount(HourlyForecastRow, {
+      props: {
+        hourData: sampleHourlyData,
+        selectedMetric: 'temperature' as MetricType,
+        relativeValueOffset: 0.75
+      }
+    })
+
+    const metricBar = wrapper.find('.metric-bar')
+    expect(metricBar.exists()).toBe(true)
+    expect(metricBar.attributes('style')).toContain('width: 75%')
+  })
+
+  it('renders metric bar with minimum 4% width when no relativeValueOffset provided', () => {
+    const wrapper = mount(HourlyForecastRow, {
+      props: {
+        hourData: sampleHourlyData,
+        selectedMetric: 'temperature' as MetricType
+      }
+    })
+
+    const metricBar = wrapper.find('.metric-bar')
+    expect(metricBar.exists()).toBe(true)
+    expect(metricBar.attributes('style')).toContain('width: 4%')
+  })
+
+  it('renders metric container with proper structure', () => {
+    const wrapper = mount(HourlyForecastRow, {
+      props: {
+        hourData: sampleHourlyData,
+        selectedMetric: 'temperature' as MetricType,
+        relativeValueOffset: 0.5
+      }
+    })
+
+    const metricContainer = wrapper.find('.metric-container')
+    expect(metricContainer.exists()).toBe(true)
+
+    const metricBar = wrapper.find('.metric-bar')
+    const metricValue = wrapper.find('.hour-metric-value')
+
+    expect(metricBar.exists()).toBe(true)
+    expect(metricValue.exists()).toBe(true)
+    expect(metricValue.text()).toBe('65°')
+  })
+
   it('displays condition label when showConditionLabel is true', () => {
     const wrapper = mount(HourlyForecastRow, {
       props: {

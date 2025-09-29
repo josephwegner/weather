@@ -14,7 +14,13 @@
     </td>
     <td class="hour-condition" v-else></td>
     <td class="hour-metric">
-      <span class="hour-metric-value" :style="{ position: 'relative', left: `${(relativeValueOffset * 100 || 0)}%` }">{{ getMetricValue(hourData) }}</span>
+      <div class="metric-container">
+        <div
+          class="metric-bar"
+          :style="{ width: `${relativeValueOffset ? Math.max(relativeValueOffset * 100, 4) : 4}%` }"
+        ></div>
+        <span class="hour-metric-value">{{ getMetricValue(hourData) }}</span>
+      </div>
     </td>
   </tr>
 </template>
@@ -32,7 +38,7 @@
   interface Props {
     hourData: HourlyForecast
     selectedMetric: MetricType
-    showConditionLabel?: boolean,
+    showConditionLabel?: boolean
     relativeValueOffset?: number
   }
 
@@ -144,9 +150,24 @@
     position: relative;
   }
 
+  .metric-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+  }
+
+  .metric-bar {
+    height: 2px;
+    background-color: rgb(107, 114, 128);
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
   .hour-metric-value {
     position: relative;
     right: 0;
+    white-space: nowrap;
   }
 
   @media (max-width: 768px) {
