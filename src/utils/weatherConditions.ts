@@ -14,6 +14,7 @@ export type WeatherCategory =
 export interface WeatherCondition {
   category: WeatherCategory
   color: string
+  iconClass: string
 }
 
 const weatherColorMap: Record<WeatherCategory, string> = {
@@ -28,6 +29,20 @@ const weatherColorMap: Record<WeatherCategory, string> = {
   'heavy-rain': '#1e40af', // Darker blue for heavy rain
   snow: '#e2e8f0', // Light gray/white for snow
   thunderstorm: '#8b5cf6' // Purple for storms
+}
+
+const weatherIconClassMap: Record<WeatherCategory, string> = {
+  'clear-day': 'wi-day-sunny',
+  'clear-night': 'wi-night-clear',
+  'few-clouds': 'wi-day-cloudy',
+  'scattered-clouds': 'wi-cloudy',
+  'broken-clouds': 'wi-cloudy',
+  'overcast-clouds': 'wi-cloudy',
+  mist: 'wi-fog',
+  'light-rain': 'wi-rain',
+  'heavy-rain': 'wi-rain',
+  snow: 'wi-snow',
+  thunderstorm: 'wi-thunderstorm'
 }
 
 const iconCategoryMap: Record<string, WeatherCategory> = {
@@ -73,14 +88,16 @@ export function getWeatherCondition(icon: string): WeatherCondition {
   if (!icon || typeof icon !== 'string') {
     return {
       category: 'overcast-clouds',
-      color: weatherColorMap['overcast-clouds']
+      color: weatherColorMap['overcast-clouds'],
+      iconClass: weatherIconClassMap['overcast-clouds']
     }
   }
 
   const category = iconCategoryMap[icon] || 'overcast-clouds' // Default to overcast-clouds if unknown
   return {
     category,
-    color: weatherColorMap[category]
+    color: weatherColorMap[category],
+    iconClass: weatherIconClassMap[category]
   }
 }
 
@@ -90,6 +107,10 @@ export function getWeatherColor(icon: string): string {
 
 export function getWeatherCategory(icon: string): WeatherCategory {
   return getWeatherCondition(icon).category
+}
+
+export function getWeatherIconClass(icon: string): string {
+  return getWeatherCondition(icon).iconClass
 }
 
 export function getConditionLabel(description: string, category: WeatherCategory): string {

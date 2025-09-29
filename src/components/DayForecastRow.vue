@@ -17,7 +17,11 @@
             >
           </div>
         </div>
-        <img :src="iconUrl" :alt="dayForecast.description" class="weather-icon" />
+        <i
+          :class="`wi ${weatherIconClass}`"
+          class="weather-icon"
+          :title="dayForecast.description"
+        ></i>
       </div>
 
       <div class="temperature-range" v-if="!temperatureRangePosition">
@@ -102,7 +106,7 @@
   import type { DailyForecast } from '../types/weather'
   import type { MetricType, MetricOption } from '../types/metrics'
   import { useWeatherStore } from '../stores/weather'
-  import { getWeatherCategory } from '../utils/weatherConditions'
+  import { getWeatherCategory, getWeatherIconClass } from '../utils/weatherConditions'
   import MetricToggle from './MetricToggle.vue'
   import HourlyForecastRow from './HourlyForecastRow.vue'
   import type { TemperatureRangePosition } from '../utils/temperatureRange'
@@ -138,8 +142,8 @@
     return date.toLocaleDateString('en-US', { weekday: 'short' })
   })
 
-  const iconUrl = computed(() => {
-    return `https://openweathermap.org/img/w/${props.dayForecast.icon}.png`
+  const weatherIconClass = computed(() => {
+    return getWeatherIconClass(props.dayForecast.icon)
   })
 
   const hourlyData = computed(() => {
@@ -307,10 +311,10 @@
   }
 
   .weather-icon {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
+    font-size: 1.5rem;
+    color: rgb(157, 181, 206);
     justify-self: center;
+    line-height: 1;
   }
 
   .day-summary:hover {
