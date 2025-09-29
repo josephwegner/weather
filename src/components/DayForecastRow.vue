@@ -341,7 +341,6 @@
     display: flex;
     flex-direction: column;
     height: 300px;
-    padding-top: 0.5rem;
   }
 
   .hourly-content {

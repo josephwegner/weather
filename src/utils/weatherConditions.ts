@@ -1,4 +1,15 @@
-export type WeatherCategory = 'clear' | 'cloudy' | 'rain' | 'snow' | 'storm'
+export type WeatherCategory =
+  | 'clear-day'
+  | 'clear-night'
+  | 'few-clouds'
+  | 'scattered-clouds'
+  | 'broken-clouds'
+  | 'overcast-clouds'
+  | 'mist'
+  | 'light-rain'
+  | 'heavy-rain'
+  | 'snow'
+  | 'thunderstorm'
 
 export interface WeatherCondition {
   category: WeatherCategory
@@ -6,37 +17,51 @@ export interface WeatherCondition {
 }
 
 const weatherColorMap: Record<WeatherCategory, string> = {
-  clear: '#f59e0b', // Warm orange for sunny conditions
-  cloudy: '#6b7280', // Gray matching existing theme
-  rain: '#4a90e2', // Existing blue accent
-  snow: '#e2e8f0', // Light gray/white
-  storm: '#8b5cf6' // Purple for dramatic effect
+  'clear-day': '#ffd568', // Bright yellow-orange for sunny day
+  'clear-night': '#60a5fa', // Soft blue for clear night
+  'few-clouds': '#94a3b8', // Light gray for few clouds
+  'scattered-clouds': '#64748b', // Medium gray for scattered clouds
+  'broken-clouds': '#475569', // Darker gray for broken clouds
+  'overcast-clouds': '#334155', // Dark gray for overcast
+  mist: '#9ca3af', // Muted gray for mist/fog
+  'light-rain': '#3b82f6', // Blue for light rain
+  'heavy-rain': '#1e40af', // Darker blue for heavy rain
+  snow: '#e2e8f0', // Light gray/white for snow
+  thunderstorm: '#8b5cf6' // Purple for storms
 }
 
 const iconCategoryMap: Record<string, WeatherCategory> = {
-  // Clear sky
-  '01d': 'clear',
-  '01n': 'clear',
+  // Clear sky - differentiate day/night
+  '01d': 'clear-day',
+  '01n': 'clear-night',
 
-  // Few clouds, scattered clouds, broken clouds, mist
-  '02d': 'cloudy',
-  '02n': 'cloudy',
-  '03d': 'cloudy',
-  '03n': 'cloudy',
-  '04d': 'cloudy',
-  '04n': 'cloudy',
-  '50d': 'cloudy',
-  '50n': 'cloudy',
+  // Few clouds
+  '02d': 'few-clouds',
+  '02n': 'few-clouds',
 
-  // Shower rain, rain
-  '09d': 'rain',
-  '09n': 'rain',
-  '10d': 'rain',
-  '10n': 'rain',
+  // Scattered clouds
+  '03d': 'scattered-clouds',
+  '03n': 'scattered-clouds',
+
+  // Broken clouds
+  '04d': 'broken-clouds',
+  '04n': 'broken-clouds',
+
+  // Mist
+  '50d': 'mist',
+  '50n': 'mist',
+
+  // Light rain (shower rain)
+  '09d': 'light-rain',
+  '09n': 'light-rain',
+
+  // Heavy rain
+  '10d': 'heavy-rain',
+  '10n': 'heavy-rain',
 
   // Thunderstorm
-  '11d': 'storm',
-  '11n': 'storm',
+  '11d': 'thunderstorm',
+  '11n': 'thunderstorm',
 
   // Snow
   '13d': 'snow',
@@ -47,12 +72,12 @@ export function getWeatherCondition(icon: string): WeatherCondition {
   // Handle null, undefined, or empty string
   if (!icon || typeof icon !== 'string') {
     return {
-      category: 'cloudy',
-      color: weatherColorMap.cloudy
+      category: 'overcast-clouds',
+      color: weatherColorMap['overcast-clouds']
     }
   }
 
-  const category = iconCategoryMap[icon] || 'cloudy' // Default to cloudy if unknown
+  const category = iconCategoryMap[icon] || 'overcast-clouds' // Default to overcast-clouds if unknown
   return {
     category,
     color: weatherColorMap[category]
@@ -81,16 +106,28 @@ export function getConditionLabel(description: string, category: WeatherCategory
 
 function getCategoryLabel(category: WeatherCategory): string {
   switch (category) {
-    case 'clear':
+    case 'clear-day':
       return 'Clear'
-    case 'cloudy':
-      return 'Cloudy'
-    case 'rain':
-      return 'Rain'
+    case 'clear-night':
+      return 'Clear'
+    case 'few-clouds':
+      return 'Few Clouds'
+    case 'scattered-clouds':
+      return 'Scattered Clouds'
+    case 'broken-clouds':
+      return 'Broken Clouds'
+    case 'overcast-clouds':
+      return 'Overcast'
+    case 'mist':
+      return 'Mist'
+    case 'light-rain':
+      return 'Light Rain'
+    case 'heavy-rain':
+      return 'Heavy Rain'
     case 'snow':
       return 'Snow'
-    case 'storm':
-      return 'Storm'
+    case 'thunderstorm':
+      return 'Thunderstorm'
     default:
       return ''
   }

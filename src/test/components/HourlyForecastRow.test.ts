@@ -59,8 +59,8 @@ describe('HourlyForecastRow Component', () => {
     })
 
     const row = wrapper.find('.hourly-row')
-    // '02d' should be cloudy (#6b7280 = rgb(107, 114, 128))
-    expect(row.attributes('style')).toContain('border-left-color: rgb(107, 114, 128)')
+    // '02d' should be few-clouds (#94a3b8 = rgb(148, 163, 184))
+    expect(row.attributes('style')).toContain('border-left-color: rgb(148, 163, 184)')
     expect(row.attributes('style')).toContain('border-left-width: 0.5rem')
   })
 
@@ -133,10 +133,12 @@ describe('HourlyForecastRow Component', () => {
 
   it('displays different border colors for different weather conditions', () => {
     const weatherConditions = [
-      { icon: '01d', expectedRgb: 'rgb(245, 158, 11)', category: 'clear' }, // #f59e0b
-      { icon: '02d', expectedRgb: 'rgb(107, 114, 128)', category: 'cloudy' }, // #6b7280
-      { icon: '09d', expectedRgb: 'rgb(74, 144, 226)', category: 'rain' }, // #4a90e2
-      { icon: '11d', expectedRgb: 'rgb(139, 92, 246)', category: 'storm' }, // #8b5cf6
+      { icon: '01d', expectedRgb: 'rgb(255, 213, 104)', category: 'clear-day' }, // #ffd568
+      { icon: '01n', expectedRgb: 'rgb(96, 165, 250)', category: 'clear-night' }, // #60a5fa
+      { icon: '02d', expectedRgb: 'rgb(148, 163, 184)', category: 'few-clouds' }, // #94a3b8
+      { icon: '09d', expectedRgb: 'rgb(59, 130, 246)', category: 'light-rain' }, // #3b82f6
+      { icon: '10d', expectedRgb: 'rgb(30, 64, 175)', category: 'heavy-rain' }, // #1e40af
+      { icon: '11d', expectedRgb: 'rgb(139, 92, 246)', category: 'thunderstorm' }, // #8b5cf6
       { icon: '13d', expectedRgb: 'rgb(226, 232, 240)', category: 'snow' } // #e2e8f0
     ]
 

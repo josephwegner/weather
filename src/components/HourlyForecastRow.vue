@@ -145,7 +145,7 @@
     font-weight: 600;
     font-size: 0.9rem;
     color: white;
-    padding: 0.75rem 2.5rem 0 0.75rem;
+    padding: 0.75rem 4rem 0 0.75rem;
     width: 100%;
     position: relative;
   }
@@ -184,7 +184,7 @@
     }
 
     .hour-metric {
-      padding: 0.5rem;
+      padding: 0.5rem 3rem 0.5rem 0.5rem;
       font-size: 0.8rem;
       width: 100%;
     }

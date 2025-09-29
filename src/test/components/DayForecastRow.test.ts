@@ -370,7 +370,7 @@ describe('DayForecastRow Component', () => {
     // Should include time, condition, category, and metric value
     expect(ariaLabel).toContain('12 AM') // Time
     expect(ariaLabel).toContain('Clear Sky') // Condition
-    expect(ariaLabel).toContain('clear conditions') // Category
+    expect(ariaLabel).toContain('clear-day conditions') // Category
     expect(ariaLabel).toContain('70°') // Temperature metric
   })
 })

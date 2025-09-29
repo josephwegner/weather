@@ -69,8 +69,6 @@
   }
 
   .forecast-list {
-    background: rgba(51, 65, 85, 0.8);
-    border: 1px solid rgba(71, 85, 105, 0.5);
-    border-radius: 8px;
+    background: transparent;
   }
 </style>

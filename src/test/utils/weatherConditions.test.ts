@@ -7,32 +7,32 @@ import {
 
 describe('Weather Conditions Utility', () => {
   describe('getWeatherCategory', () => {
-    it('maps clear sky icons to clear category', () => {
-      expect(getWeatherCategory('01d')).toBe('clear')
-      expect(getWeatherCategory('01n')).toBe('clear')
+    it('maps clear sky icons to appropriate categories', () => {
+      expect(getWeatherCategory('01d')).toBe('clear-day')
+      expect(getWeatherCategory('01n')).toBe('clear-night')
     })
 
-    it('maps cloud icons to cloudy category', () => {
-      expect(getWeatherCategory('02d')).toBe('cloudy')
-      expect(getWeatherCategory('02n')).toBe('cloudy')
-      expect(getWeatherCategory('03d')).toBe('cloudy')
-      expect(getWeatherCategory('03n')).toBe('cloudy')
-      expect(getWeatherCategory('04d')).toBe('cloudy')
-      expect(getWeatherCategory('04n')).toBe('cloudy')
-      expect(getWeatherCategory('50d')).toBe('cloudy')
-      expect(getWeatherCategory('50n')).toBe('cloudy')
+    it('maps cloud icons to appropriate categories', () => {
+      expect(getWeatherCategory('02d')).toBe('few-clouds')
+      expect(getWeatherCategory('02n')).toBe('few-clouds')
+      expect(getWeatherCategory('03d')).toBe('scattered-clouds')
+      expect(getWeatherCategory('03n')).toBe('scattered-clouds')
+      expect(getWeatherCategory('04d')).toBe('broken-clouds')
+      expect(getWeatherCategory('04n')).toBe('broken-clouds')
+      expect(getWeatherCategory('50d')).toBe('mist')
+      expect(getWeatherCategory('50n')).toBe('mist')
     })
 
-    it('maps rain icons to rain category', () => {
-      expect(getWeatherCategory('09d')).toBe('rain')
-      expect(getWeatherCategory('09n')).toBe('rain')
-      expect(getWeatherCategory('10d')).toBe('rain')
-      expect(getWeatherCategory('10n')).toBe('rain')
+    it('maps rain icons to appropriate categories', () => {
+      expect(getWeatherCategory('09d')).toBe('light-rain')
+      expect(getWeatherCategory('09n')).toBe('light-rain')
+      expect(getWeatherCategory('10d')).toBe('heavy-rain')
+      expect(getWeatherCategory('10n')).toBe('heavy-rain')
     })
 
-    it('maps thunderstorm icons to storm category', () => {
-      expect(getWeatherCategory('11d')).toBe('storm')
-      expect(getWeatherCategory('11n')).toBe('storm')
+    it('maps thunderstorm icons to thunderstorm category', () => {
+      expect(getWeatherCategory('11d')).toBe('thunderstorm')
+      expect(getWeatherCategory('11n')).toBe('thunderstorm')
     })
 
     it('maps snow icons to snow category', () => {
@@ -40,70 +40,72 @@ describe('Weather Conditions Utility', () => {
       expect(getWeatherCategory('13n')).toBe('snow')
     })
 
-    it('defaults to cloudy for unknown icons', () => {
-      expect(getWeatherCategory('99x')).toBe('cloudy')
-      expect(getWeatherCategory('')).toBe('cloudy')
-      expect(getWeatherCategory('invalid')).toBe('cloudy')
+    it('defaults to overcast-clouds for unknown icons', () => {
+      expect(getWeatherCategory('99x')).toBe('overcast-clouds')
+      expect(getWeatherCategory('')).toBe('overcast-clouds')
+      expect(getWeatherCategory('invalid')).toBe('overcast-clouds')
     })
 
     it('handles null and undefined input gracefully', () => {
-      expect(getWeatherCategory(null as any)).toBe('cloudy')
-      expect(getWeatherCategory(undefined as any)).toBe('cloudy')
-      expect(getWeatherCategory(123 as any)).toBe('cloudy')
+      expect(getWeatherCategory(null as any)).toBe('overcast-clouds')
+      expect(getWeatherCategory(undefined as any)).toBe('overcast-clouds')
+      expect(getWeatherCategory(123 as any)).toBe('overcast-clouds')
     })
   })
 
   describe('getWeatherColor', () => {
     it('returns correct colors for each category', () => {
-      expect(getWeatherColor('01d')).toBe('#f59e0b') // clear
-      expect(getWeatherColor('02d')).toBe('#6b7280') // cloudy
-      expect(getWeatherColor('09d')).toBe('#4a90e2') // rain
-      expect(getWeatherColor('11d')).toBe('#8b5cf6') // storm
+      expect(getWeatherColor('01d')).toBe('#ffd568') // clear-day
+      expect(getWeatherColor('01n')).toBe('#60a5fa') // clear-night
+      expect(getWeatherColor('02d')).toBe('#94a3b8') // few-clouds
+      expect(getWeatherColor('09d')).toBe('#3b82f6') // light-rain
+      expect(getWeatherColor('10d')).toBe('#1e40af') // heavy-rain
+      expect(getWeatherColor('11d')).toBe('#8b5cf6') // thunderstorm
       expect(getWeatherColor('13d')).toBe('#e2e8f0') // snow
     })
 
-    it('returns cloudy color for unknown icons', () => {
-      expect(getWeatherColor('unknown')).toBe('#6b7280')
+    it('returns overcast-clouds color for unknown icons', () => {
+      expect(getWeatherColor('unknown')).toBe('#334155')
     })
 
     it('handles null and undefined input gracefully', () => {
-      expect(getWeatherColor(null as any)).toBe('#6b7280')
-      expect(getWeatherColor(undefined as any)).toBe('#6b7280')
-      expect(getWeatherColor('' as any)).toBe('#6b7280')
+      expect(getWeatherColor(null as any)).toBe('#334155')
+      expect(getWeatherColor(undefined as any)).toBe('#334155')
+      expect(getWeatherColor('' as any)).toBe('#334155')
     })
   })
 
   describe('getWeatherCondition', () => {
     it('returns complete condition object for clear sky', () => {
       const condition = getWeatherCondition('01d')
-      expect(condition.category).toBe('clear')
-      expect(condition.color).toBe('#f59e0b')
+      expect(condition.category).toBe('clear-day')
+      expect(condition.color).toBe('#ffd568')
     })
 
     it('returns complete condition object for rain', () => {
       const condition = getWeatherCondition('10n')
-      expect(condition.category).toBe('rain')
-      expect(condition.color).toBe('#4a90e2')
+      expect(condition.category).toBe('heavy-rain')
+      expect(condition.color).toBe('#1e40af')
     })
 
     it('returns default condition for unknown icon', () => {
       const condition = getWeatherCondition('xyz')
-      expect(condition.category).toBe('cloudy')
-      expect(condition.color).toBe('#6b7280')
+      expect(condition.category).toBe('overcast-clouds')
+      expect(condition.color).toBe('#334155')
     })
 
     it('handles null and undefined input gracefully', () => {
       const nullCondition = getWeatherCondition(null as any)
-      expect(nullCondition.category).toBe('cloudy')
-      expect(nullCondition.color).toBe('#6b7280')
+      expect(nullCondition.category).toBe('overcast-clouds')
+      expect(nullCondition.color).toBe('#334155')
 
       const undefinedCondition = getWeatherCondition(undefined as any)
-      expect(undefinedCondition.category).toBe('cloudy')
-      expect(undefinedCondition.color).toBe('#6b7280')
+      expect(undefinedCondition.category).toBe('overcast-clouds')
+      expect(undefinedCondition.color).toBe('#334155')
 
       const emptyCondition = getWeatherCondition('')
-      expect(emptyCondition.category).toBe('cloudy')
-      expect(emptyCondition.color).toBe('#6b7280')
+      expect(emptyCondition.category).toBe('overcast-clouds')
+      expect(emptyCondition.color).toBe('#334155')
     })
   })
 })
