@@ -92,6 +92,7 @@
       :animation-speed="radarStore.animationSpeed"
       :current-frame-index="radarStore.currentFrameIndex"
       :frame-count="radarStore.frames.length"
+      :frames="radarStore.frames"
       @close="handleRadarDrawerClose"
       @layer-toggle="handleLayerToggle"
       @animation-toggle="handleAnimationToggle"

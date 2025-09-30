@@ -11,6 +11,7 @@ const __dirname = path.dirname(__filename)
 
 const PORT = process.env.PORT || (process.env.NODE_ENV === 'production' ? 3000 : 3001)
 const VISUAL_CROSSING_API_KEY = process.env.VISUAL_CROSSING_API_KEY
+const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY
 const VISUAL_CROSSING_BASE_URL =
   'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline'
 
@@ -19,9 +20,16 @@ if (!VISUAL_CROSSING_API_KEY) {
   process.exit(1)
 }
 
+if (!OPENWEATHER_API_KEY) {
+  console.warn(
+    'OPENWEATHER_API_KEY environment variable not found, using demo key for radar functionality'
+  )
+}
+
 const weatherService = new WeatherService({
   apiKey: VISUAL_CROSSING_API_KEY,
-  baseUrl: VISUAL_CROSSING_BASE_URL
+  baseUrl: VISUAL_CROSSING_BASE_URL,
+  openWeatherApiKey: OPENWEATHER_API_KEY
 })
 
 const app = createApp({

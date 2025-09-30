@@ -40,5 +40,40 @@ export function createWeatherRoutes(weatherService: WeatherService): Router {
     }
   })
 
+  router.get('/radar/:lat/:lng', async (req: Request, res: Response) => {
+    try {
+      const { lat, lng } = req.params
+      const { layers } = req.query
+
+      const layerTypes = typeof layers === 'string' ? layers.split(',') : ['precipitation']
+      const data = await weatherService.getRadarFrames({ lat, lng }, layerTypes)
+      res.json(data)
+    } catch (error) {
+      console.error('Error fetching radar data:', error)
+      res.status(500).json({ error: 'Failed to fetch radar data' })
+    }
+  })
+
+  // Proxy route for radar tiles to handle CORS
+  router.get('/radar/tile/:layer/:z/:x/:y', async (req: Request, res: Response) => {
+    try {
+      const { layer, z, x, y } = req.params
+
+      // Validate layer type
+      const validLayers = ['precipitation_new', 'clouds_new', 'temp_new']
+      if (!validLayers.includes(layer)) {
+        return res.status(400).json({ error: 'Invalid layer type' })
+      }
+
+      const tileUrl = await weatherService.getRadarTileUrl(layer, z, x, y)
+
+      // Redirect to the tile URL or proxy the request
+      res.redirect(tileUrl)
+    } catch (error) {
+      console.error('Error fetching radar tile:', error)
+      res.status(500).json({ error: 'Failed to fetch radar tile' })
+    }
+  })
+
   return router
 }
