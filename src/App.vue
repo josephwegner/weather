@@ -87,14 +87,14 @@
       :is-loading="radarStore.isLoading"
       :error="radarStore.error"
       :location="weatherStore.currentLocation"
-      :active-layer-types="radarStore.activeLayerTypes"
+      :active-layer-type="radarStore.activeLayerType"
       :is-animation-playing="radarStore.isAnimationPlaying"
       :animation-speed="radarStore.animationSpeed"
       :current-frame-index="radarStore.currentFrameIndex"
       :frame-count="radarStore.frames.length"
       :frames="radarStore.frames"
       @close="handleRadarDrawerClose"
-      @layer-toggle="handleLayerToggle"
+      @layer-change="handleLayerChange"
       @animation-toggle="handleAnimationToggle"
       @speed-change="handleSpeedChange"
       @frame-change="handleFrameChange"
@@ -166,12 +166,8 @@
     radarStore.closeDrawer()
   }
 
-  const handleLayerToggle = (layerType: RadarLayerType, enabled: boolean) => {
-    if (enabled) {
-      radarStore.addLayerType(layerType)
-    } else {
-      radarStore.removeLayerType(layerType)
-    }
+  const handleLayerChange = (layerType: RadarLayerType) => {
+    radarStore.setActiveLayerType(layerType)
     // Reload radar data with new layer configuration
     radarStore.loadRadarFrames(weatherStore.currentLocation)
   }
