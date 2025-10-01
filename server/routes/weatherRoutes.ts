@@ -43,10 +43,10 @@ export function createWeatherRoutes(weatherService: WeatherService): Router {
   router.get('/radar/:lat/:lng', async (req: Request, res: Response) => {
     try {
       const { lat, lng } = req.params
-      const { layers } = req.query
+      const { layer } = req.query
 
-      const layerTypes = typeof layers === 'string' ? layers.split(',') : ['precipitation']
-      const data = await weatherService.getRadarFrames({ lat, lng }, layerTypes)
+      const layerType = typeof layer === 'string' ? layer : 'precipitation_intensity'
+      const data = await weatherService.getRadarFrames({ lat, lng }, layerType)
       res.json(data)
     } catch (error) {
       console.error('Error fetching radar data:', error)
@@ -59,8 +59,24 @@ export function createWeatherRoutes(weatherService: WeatherService): Router {
     try {
       const { layer, z, x, y } = req.params
 
-      // Validate layer type
-      const validLayers = ['precipitation_new', 'clouds_new', 'temp_new']
+      // Validate layer type - support both legacy and Weather Maps 2.0 codes
+      const validLayers = [
+        // Legacy format
+        'precipitation_new',
+        'clouds_new',
+        'temp_new',
+        'wind_new',
+        'pressure_new',
+        // Weather Maps 2.0 codes
+        'PR0',
+        'PARAIN',
+        'PASNOW',
+        'WNDUV',
+        'PA0',
+        'TA2',
+        'HRD0',
+        'CL'
+      ]
       if (!validLayers.includes(layer)) {
         return res.status(400).json({ error: 'Invalid layer type' })
       }
