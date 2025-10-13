@@ -10,8 +10,13 @@
       <div class="left-content">
         <div class="day-info">
           <div class="day-name">{{ dayName }}</div>
-          <div class="precipitation">
-            <span class="water-drop">💧</span>
+          <div class="precipitation" v-if="dayForecast.precipitationProbability > 0">
+            <div
+              class="precip-bar"
+              :style="{
+                width: `${precipitationOffset !== undefined ? Math.max(precipitationOffset * 40, 4) : 4}px`
+              }"
+            ></div>
             <span class="precip-percentage"
               >{{ Math.round(dayForecast.precipitationProbability) }}%</span
             >
@@ -114,6 +119,7 @@
   interface Props {
     dayForecast: DailyForecast
     temperatureRangePosition?: TemperatureRangePosition
+    precipitationOffset?: number
   }
 
   const props = defineProps<Props>()
@@ -296,20 +302,32 @@
     min-width: 0;
   }
 
+  .day-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: white;
+    text-align: left;
+  }
+
   .precipitation {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.5rem;
+    min-width: 0;
   }
 
-  .water-drop {
-    font-size: 0.8rem;
+  .precip-bar {
+    height: 2px;
+    background-color: #60a5fa;
+    flex-shrink: 0;
   }
 
   .precip-percentage {
     font-size: 0.8rem;
     color: #60a5fa;
     font-weight: 500;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .weather-icon {
@@ -317,17 +335,11 @@
     color: rgb(157, 181, 206);
     justify-self: center;
     line-height: 1;
+    margin-left: 1rem;
   }
 
   .day-summary:hover {
     background-color: rgba(71, 85, 105, 0.3);
-  }
-
-  .day-name {
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: white;
-    text-align: left;
   }
 
   .temperature-range {

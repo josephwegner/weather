@@ -16,6 +16,7 @@
         :key="day.date"
         :dayForecast="day"
         :temperatureRangePosition="temperatureRangePositions[day.date]"
+        :precipitationOffset="precipitationOffsets[day.date]"
         data-testid="day-forecast-row"
       />
     </div>
@@ -35,6 +36,37 @@
       return {}
     }
     return calculateTemperatureRangePositions(store.dailyForecast.slice(0, 7))
+  })
+
+  const precipitationOffsets = computed(() => {
+    if (!store.dailyForecast || store.dailyForecast.length === 0) {
+      return {}
+    }
+
+    const forecasts = store.dailyForecast.slice(0, 7)
+    const offsets: Record<string, number> = {}
+
+    // Find min and max precipitation probability
+    let minPrecip = Infinity
+    let maxPrecip = -Infinity
+    forecasts.forEach((day) => {
+      const precip = day.precipitationProbability
+      if (precip < minPrecip) minPrecip = precip
+      if (precip > maxPrecip) maxPrecip = precip
+    })
+
+    // Calculate relative offset for each day
+    forecasts.forEach((day) => {
+      const precip = day.precipitationProbability
+      const range = maxPrecip - minPrecip
+      if (range === 0) {
+        offsets[day.date] = 0
+      } else {
+        offsets[day.date] = (precip - minPrecip) / range
+      }
+    })
+
+    return offsets
   })
 
   onMounted(() => {
