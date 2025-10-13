@@ -76,6 +76,34 @@ describe('DayForecastRow Component', () => {
     expect(wrapper.text()).toContain('Sat')
   })
 
+  it('displays correct day name regardless of timezone (uses date string not timestamp)', () => {
+    // Test case: date string is "2022-01-01" (Saturday)
+    // If we incorrectly use the timestamp (UTC midnight), it could show as Friday in US timezones
+    const saturdayForecast: DailyForecast = {
+      date: '2022-01-01', // Saturday
+      timestamp: 1640995200, // This is midnight UTC on 2022-01-01, which is Friday in US timezones
+      temperatureHigh: 75,
+      temperatureLow: 55,
+      precipitationProbability: 20,
+      precipitationIntensity: 0,
+      windSpeed: 10,
+      windDirection: 180,
+      humidity: 60,
+      uvIndex: 5,
+      description: 'sunny',
+      icon: '01d'
+    }
+
+    const wrapper = mount(DayForecastRow, {
+      props: { dayForecast: saturdayForecast }
+    })
+
+    // Should display "Sat" because we use the date string, not the timestamp
+    expect(wrapper.text()).toContain('Sat')
+    // Should not display "Fri" (which would happen if using UTC timestamp in US timezone)
+    expect(wrapper.text()).not.toContain('Fri')
+  })
+
   it('starts collapsed (not expanded)', () => {
     const wrapper = mount(DayForecastRow, {
       props: { dayForecast: sampleDayForecast }

@@ -138,7 +138,9 @@
   ]
 
   const dayName = computed(() => {
-    const date = new Date(props.dayForecast.timestamp * 1000)
+    // Use the date string directly to avoid timezone issues
+    // The date field is YYYY-MM-DD format
+    const date = new Date(props.dayForecast.date + 'T12:00:00')
     return date.toLocaleDateString('en-US', { weekday: 'short' })
   })
 
