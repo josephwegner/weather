@@ -6,7 +6,7 @@
         v-model="searchQuery"
         type="text"
         placeholder="Search for a city or enter zip code..."
-        class="w-full py-2 pl-8 pr-16 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-400 text-sm"
+        class="w-full py-2 pl-8 pr-16 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-400 text-base"
         @input="onSearchInput"
         @keydown.escape="clearSearch"
         @keydown.enter="selectFirstResult"
