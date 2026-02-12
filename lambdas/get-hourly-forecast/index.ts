@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
 import { WeatherService } from '../shared/services/weatherService'
-import { createSuccessResponse, createErrorResponse } from '../shared/utils/response'
+import { createSuccessResponse, createErrorResponse } from 'family-paas/lambda-response'
 
 // Lazy initialization for connection reuse (Lambda optimization)
 let weatherService: WeatherService | null = null

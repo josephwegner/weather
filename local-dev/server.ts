@@ -5,7 +5,7 @@ dotenv.config()
 
 import express from 'express'
 import cors from 'cors'
-import { simulateLambda } from './lambda-simulator'
+import { simulateLambda } from 'family-paas/lambda-simulator'
 
 // Import Lambda handlers (after dotenv.config())
 import { handler as currentHandler } from '../lambdas/get-current-weather/index'
