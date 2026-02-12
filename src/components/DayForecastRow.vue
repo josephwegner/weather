@@ -9,7 +9,9 @@
     >
       <div class="left-content">
         <div class="day-info">
-          <div class="day-name">{{ dayName }}</div>
+          <div class="day-name">
+            {{ dayOfWeek }} <span class="date-label">{{ dateLabel }}</span>
+          </div>
           <div class="precipitation" v-if="dayForecast.precipitationProbability > 0">
             <div
               class="precip-bar"
@@ -143,11 +145,14 @@
     { key: 'visibility', label: 'VISIBILITY', unit: 'mi' }
   ]
 
-  const dayName = computed(() => {
-    // Use the date string directly to avoid timezone issues
-    // The date field is YYYY-MM-DD format
+  const dayOfWeek = computed(() => {
     const date = new Date(props.dayForecast.date + 'T12:00:00')
     return date.toLocaleDateString('en-US', { weekday: 'short' })
+  })
+
+  const dateLabel = computed(() => {
+    const date = new Date(props.dayForecast.date + 'T12:00:00')
+    return `${date.getMonth() + 1}/${date.getDate()}`
   })
 
   const weatherIconClass = computed(() => {
@@ -307,6 +312,10 @@
     font-size: 0.9rem;
     color: white;
     text-align: left;
+  }
+
+  .date-label {
+    color: rgb(148, 163, 184);
   }
 
   .precipitation {

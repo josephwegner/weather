@@ -31,9 +31,7 @@ export function createErrorResponse(
     },
     body: JSON.stringify({
       error: message,
-      ...(process.env.NODE_ENV === 'development' && error
-        ? { details: error.message }
-        : {})
+      ...(process.env.NODE_ENV === 'development' && error ? { details: error.message } : {})
     })
   }
 }
