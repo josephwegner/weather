@@ -299,7 +299,7 @@ describe('Geolocation Service', () => {
         timestamp: Date.now()
       }
 
-      storedSuccessCallback!(mockPosition)
+      storedSuccessCallback!(mockPosition as GeolocationPosition)
 
       // Give time for async reverse geocoding
       await new Promise((resolve) => setTimeout(resolve, 0))
