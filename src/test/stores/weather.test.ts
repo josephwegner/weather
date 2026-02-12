@@ -100,14 +100,14 @@ describe('Weather Store', () => {
 
   it('computes next7Days correctly', () => {
     const store = useWeatherStore()
-    const mockDailyForecast: DailyForecast[] = Array.from({ length: 10 }, (_, i) => ({
+    const mockDailyForecast: DailyForecast[] = Array.from({ length: 15 }, (_, i) => ({
       ...TEST_WEATHER_DATA.DAILY_SAMPLE,
       date: `2022-01-${String(i + 1).padStart(2, '0')}`
     }))
 
     store.setDailyForecast(mockDailyForecast)
-    expect(store.next7Days).toHaveLength(7)
-    expect(store.next7Days).toEqual(mockDailyForecast.slice(0, 7))
+    expect(store.next7Days).toHaveLength(15)
+    expect(store.next7Days).toEqual(mockDailyForecast)
   })
 
   it('computes todaysForecast and tomorrowsForecast correctly', () => {

@@ -281,7 +281,7 @@ describe('Weather API Service', () => {
 
       const result = await weatherApi.getDailyForecast(TEST_LOCATIONS.CHICAGO)
 
-      expect(result).toHaveLength(7)
+      expect(result).toHaveLength(15)
       expect(result[0].temperatureHigh).toBeDefined()
       expect(result[0].temperatureLow).toBeDefined()
       expect(mockedAxiosGet).not.toHaveBeenCalled()

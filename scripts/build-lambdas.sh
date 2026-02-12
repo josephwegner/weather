@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+export NODE_ENV=production
+
 echo "Building Lambda functions with esbuild..."
 
 LAMBDAS=("get-current-weather" "get-hourly-forecast" "get-daily-forecast")

@@ -118,7 +118,7 @@ export const mockScenarios: MockScenario[] = [
         icon: i < 12 ? '02d' : '01n'
       }
     }),
-    dailyForecast: Array.from({ length: 7 }, (_, i) => ({
+    dailyForecast: Array.from({ length: 15 }, (_, i) => ({
       date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
       timestamp: now + i * 86400,
       temperatureHigh: getSeasonalTemperaturePattern(i, 78, 8),
@@ -175,7 +175,7 @@ export const mockScenarios: MockScenario[] = [
         icon: i >= 6 && i <= 18 ? '01d' : '01n'
       }
     }),
-    dailyForecast: Array.from({ length: 7 }, (_, i) => ({
+    dailyForecast: Array.from({ length: 15 }, (_, i) => ({
       date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
       timestamp: now + i * 86400,
       temperatureHigh: getSeasonalTemperaturePattern(i, 118, 5),
@@ -229,7 +229,7 @@ export const mockScenarios: MockScenario[] = [
         icon: '13d'
       }
     }),
-    dailyForecast: Array.from({ length: 7 }, (_, i) => ({
+    dailyForecast: Array.from({ length: 15 }, (_, i) => ({
       date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
       timestamp: now + i * 86400,
       temperatureHigh: getSeasonalTemperaturePattern(i, -15, 5),
@@ -283,7 +283,7 @@ export const mockScenarios: MockScenario[] = [
         icon: '10d'
       }
     }),
-    dailyForecast: Array.from({ length: 7 }, (_, i) => ({
+    dailyForecast: Array.from({ length: 15 }, (_, i) => ({
       date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
       timestamp: now + i * 86400,
       temperatureHigh: getSeasonalTemperaturePattern(i, 82, 3),

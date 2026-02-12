@@ -12,7 +12,7 @@
 
     <div v-else class="forecast-list">
       <DayForecastRow
-        v-for="day in store.dailyForecast.slice(0, 7)"
+        v-for="day in store.dailyForecast"
         :key="day.date"
         :dayForecast="day"
         :temperatureRangePosition="temperatureRangePositions[day.date]"
@@ -35,7 +35,7 @@
     if (!store.dailyForecast || store.dailyForecast.length === 0) {
       return {}
     }
-    return calculateTemperatureRangePositions(store.dailyForecast.slice(0, 7))
+    return calculateTemperatureRangePositions(store.dailyForecast)
   })
 
   const precipitationOffsets = computed(() => {
@@ -43,7 +43,7 @@
       return {}
     }
 
-    const forecasts = store.dailyForecast.slice(0, 7)
+    const forecasts = store.dailyForecast
     const offsets: Record<string, number> = {}
 
     // Find min and max precipitation probability

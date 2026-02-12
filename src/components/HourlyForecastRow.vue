@@ -120,10 +120,6 @@
     border-bottom: 1px solid rgb(71, 85, 105);
   }
 
-  .hourly-row:hover {
-    background: rgba(71, 85, 105, 0.3);
-  }
-
   .hour-time {
     font-size: 0.85rem;
     color: white;

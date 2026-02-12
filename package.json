@@ -8,7 +8,7 @@
     "dev:api": "tsx local-dev/server.ts",
     "dev:full": "concurrently \"npm run dev\" \"npm run dev:api\"",
     "build": "npm run build:frontend && npm run build:lambdas",
-    "build:frontend": "vue-tsc && vite build",
+    "build:frontend": "NODE_ENV=production vue-tsc && vite build",
     "build:lambdas": "bash scripts/build-lambdas.sh",
     "deploy": "bash scripts/deploy.sh",
     "deploy:lambdas": "bash scripts/deploy.sh --lambdas-only",
@@ -85,7 +85,7 @@
       "prettier --check"
     ],
     "{src,server}/**/*.{ts,vue}": [
-      "bash -c 'npm run test:all'"
+      "bash -c 'npm run test:client'"
     ]
   }
 }

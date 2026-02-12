@@ -252,10 +252,10 @@ export class WeatherApiService {
       // Make real API call
       this.log('Making API call to server for daily forecast')
 
-      // Calculate date range: today through next 6 days (7 days total)
+      // Calculate date range: today through next 14 days (15 days total)
       const today = new Date()
       const endDate = new Date(today)
-      endDate.setDate(today.getDate() + 6)
+      endDate.setDate(today.getDate() + 14)
 
       const startDateStr = today.toISOString().split('T')[0]
       const endDateStr = endDate.toISOString().split('T')[0]
@@ -264,7 +264,7 @@ export class WeatherApiService {
         `${API_BASE_URL}/weather/daily/${location.lat}/${location.lng}/${startDateStr}/${endDateStr}`
       )
 
-      const dailyData: DailyForecast[] = response.data.days.slice(0, 7).map(
+      const dailyData: DailyForecast[] = response.data.days.map(
         (day: any): DailyForecast => ({
           date: day.datetime,
           timestamp: Math.floor(new Date(day.datetime).getTime() / 1000),

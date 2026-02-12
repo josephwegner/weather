@@ -338,10 +338,6 @@
     margin-left: 1rem;
   }
 
-  .day-summary:hover {
-    background-color: rgba(71, 85, 105, 0.3);
-  }
-
   .temperature-range {
     display: flex;
     justify-content: space-between;

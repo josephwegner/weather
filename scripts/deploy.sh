@@ -4,6 +4,8 @@ set -e
 # Full deployment script for weather app
 # Usage: ./scripts/deploy.sh [--lambdas-only|--frontend-only]
 
+export NODE_ENV=production
+
 MODE=${1:-all}
 
 echo "════════════════════════════════════════════════"

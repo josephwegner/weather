@@ -103,7 +103,7 @@ export const useWeatherStore = defineStore('weather', () => {
   }
 
   const next7Days = computed(() => {
-    return dailyForecast.value.slice(0, 7)
+    return dailyForecast.value
   })
 
   const todaysForecast = computed(() => {

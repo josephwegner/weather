@@ -4,6 +4,8 @@ set -e
 # Build and deploy frontend to S3
 # Usage: ./scripts/deploy-frontend.sh
 
+export NODE_ENV=production
+
 ENVIRONMENT="prod"
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 BUCKET="weather-app-frontend-$ENVIRONMENT-$ACCOUNT_ID"
