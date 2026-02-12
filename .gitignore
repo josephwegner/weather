@@ -42,4 +42,4 @@ workbox-*.js.map
 .ai/*
 
 #Terraform
-teraform/.terraform
+terraform/.terraform/*
