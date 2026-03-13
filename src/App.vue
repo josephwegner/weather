@@ -1,7 +1,61 @@
 <template>
-  <div id="app" class="min-h-screen bg-slate-900 text-white">
+  <div
+    id="app"
+    class="min-h-screen bg-slate-900 text-white"
+    @touchstart.passive="onTouchStart"
+    @touchmove.passive="onTouchMove"
+    @touchend="onTouchEnd"
+  >
     <div class="max-w-md mx-auto">
       <main>
+        <!-- Pull to Refresh Indicator -->
+        <div
+          class="pull-refresh-indicator"
+          :class="{ 'pull-refresh-indicator--refreshing': isRefreshing }"
+          :style="{ height: pullIndicatorHeight + 'px', opacity: pullIndicatorOpacity }"
+        >
+          <div class="pull-refresh-indicator__content">
+            <svg
+              v-if="!isRefreshing"
+              class="pull-refresh-arrow"
+              :class="{ 'pull-refresh-arrow--flipped': isPastThreshold }"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg>
+            <svg
+              v-else
+              class="pull-refresh-spinner"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+              />
+            </svg>
+            <span class="text-xs text-slate-400 ml-2">
+              {{
+                isRefreshing
+                  ? 'Refreshing...'
+                  : isPastThreshold
+                    ? 'Release to refresh'
+                    : 'Pull to refresh'
+              }}
+            </span>
+          </div>
+        </div>
+
         <!-- Location Search Section -->
         <div class="bg-slate-800 p-4">
           <!-- Search bar style location picker -->
@@ -74,9 +128,10 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import type { Location } from './types/weather'
   import { useWeatherStore } from './stores/weather'
+  import { cacheService } from './services/cache'
   import WeeklyForecast from './components/WeeklyForecast.vue'
   import LocationSearch from './components/LocationSearch.vue'
 
@@ -84,6 +139,54 @@
   const showLocationSearch = ref(false)
   const selectedLocation = ref<Location | null>(null)
   const locationDisplayText = ref('')
+
+  // Pull-to-refresh state
+  const pullStartY = ref(0)
+  const pullDistance = ref(0)
+  const isPulling = ref(false)
+  const isRefreshing = ref(false)
+  const PULL_THRESHOLD = 60
+  const DAMPEN_FACTOR = 0.4
+
+  const isPastThreshold = computed(() => pullDistance.value >= PULL_THRESHOLD)
+  const pullIndicatorHeight = computed(() => Math.min(pullDistance.value, 80))
+  const pullIndicatorOpacity = computed(() => Math.min(pullDistance.value / PULL_THRESHOLD, 1))
+
+  const onTouchStart = (e: TouchEvent) => {
+    if (window.scrollY === 0 && !isRefreshing.value) {
+      pullStartY.value = e.touches[0].clientY
+      isPulling.value = true
+    }
+  }
+
+  const onTouchMove = (e: TouchEvent) => {
+    if (!isPulling.value) return
+    const delta = e.touches[0].clientY - pullStartY.value
+    if (delta > 0 && window.scrollY === 0) {
+      pullDistance.value = delta * DAMPEN_FACTOR
+    } else {
+      pullDistance.value = 0
+    }
+  }
+
+  const onTouchEnd = async () => {
+    if (!isPulling.value) return
+    isPulling.value = false
+
+    if (isPastThreshold.value) {
+      isRefreshing.value = true
+      pullDistance.value = PULL_THRESHOLD
+      await refreshData()
+      isRefreshing.value = false
+    }
+
+    pullDistance.value = 0
+  }
+
+  const refreshData = async () => {
+    cacheService.clear()
+    await Promise.all([fetchWeatherData(), weatherStore.loadDailyForecast()])
+  }
 
   const fetchWeatherData = async () => {
     try {
@@ -123,3 +226,48 @@
     fetchWeatherData()
   })
 </script>
+
+<style scoped>
+  .pull-refresh-indicator {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      height 0.2s ease,
+      opacity 0.2s ease;
+  }
+
+  .pull-refresh-indicator--refreshing {
+    transition: none;
+  }
+
+  .pull-refresh-indicator__content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pull-refresh-arrow {
+    color: #94a3b8;
+    transition: transform 0.2s ease;
+  }
+
+  .pull-refresh-arrow--flipped {
+    transform: rotate(180deg);
+  }
+
+  .pull-refresh-spinner {
+    color: #94a3b8;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
