@@ -30,7 +30,10 @@
           @touchend="onPinchEnd"
         >
           <div class="radar-tile-grid" :style="{ transform: `scale(${zoomLevel})` }">
-            <img v-for="(url, i) in currentFrameUrls" :key="i" :src="url" class="radar-tile" />
+            <div v-for="(_url, i) in currentFrameUrls" :key="i" class="radar-tile-cell">
+              <img :src="currentFrameUrls[i]" class="radar-tile radar-tile--overlay" />
+              <img :src="baseMapUrls[i]" class="radar-tile radar-tile--base" />
+            </div>
           </div>
         </div>
       </div>
@@ -67,7 +70,12 @@
   import { ref, computed, watch } from 'vue'
   import type { Location } from '../types/weather'
   import type { RadarElement, RadarElementOption } from '../types/radar'
-  import { generateTimeSteps, buildTileGrid, preloadImages } from '../services/radarService'
+  import {
+    generateTimeSteps,
+    buildTileGrid,
+    buildBaseMapGrid,
+    preloadImages
+  } from '../services/radarService'
 
   const props = defineProps<{
     isOpen: boolean
@@ -82,8 +90,7 @@
     { key: 'precipcomposite', label: 'PRECIP' },
     { key: 'temp', label: 'TEMP' },
     { key: 'wind', label: 'WIND' },
-    { key: 'windspeed', label: 'SPEED' },
-    { key: 'alerts', label: 'ALERTS' }
+    { key: 'windspeed', label: 'SPEED' }
   ]
 
   const ZOOM = 6
@@ -92,6 +99,7 @@
   const zoomLevel = ref(1)
   const isLoading = ref(true)
   const frameGridUrls = ref<string[][]>([])
+  const baseMapUrls = ref<string[]>([])
   const pinchStartDist = ref(0)
   const pinchStartZoom = ref(1)
   const scrubberTrack = ref<HTMLElement | null>(null)
@@ -148,17 +156,19 @@
     currentFrameIndex.value = 8
 
     const steps = generateTimeSteps(new Date())
+    const baseTileUrls = buildBaseMapGrid(ZOOM, props.location.lat, props.location.lng)
     const grids = steps.map((time) =>
       buildTileGrid(selectedElement.value, ZOOM, props.location.lat, props.location.lng, time)
     )
 
-    const allUrls = grids.flat()
+    const allUrls = [...baseTileUrls, ...grids.flat()]
     try {
       await preloadImages(allUrls)
     } catch {
       // show whatever loaded
     }
 
+    baseMapUrls.value = baseTileUrls
     frameGridUrls.value = grids
     isLoading.value = false
   }
@@ -258,7 +268,6 @@
 
   .radar-content {
     position: relative;
-    min-height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -288,6 +297,7 @@
 
   .radar-image-container {
     width: 100%;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -302,10 +312,22 @@
     transform-origin: center center;
   }
 
+  .radar-tile-cell {
+    position: relative;
+    width: 256px;
+    height: 256px;
+  }
+
   .radar-tile {
     width: 256px;
     height: 256px;
     display: block;
+  }
+
+  .radar-tile--base {
+    position: absolute;
+    inset: 0;
+    opacity: 0.5;
   }
 
   .radar-scrubber {

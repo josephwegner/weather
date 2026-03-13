@@ -23,7 +23,14 @@ vi.mock('../../services/radarService', () => ({
     }
     return urls
   }),
-  preloadImages: vi.fn(() => Promise.resolve(new Array(153).fill(new Image())))
+  buildBaseMapGrid: vi.fn(() => {
+    const urls: string[] = []
+    for (let i = 0; i < 9; i++) {
+      urls.push(`https://basemaps.cartocdn.com/dark_all/6/0/${i}@2x.png`)
+    }
+    return urls
+  }),
+  preloadImages: vi.fn(() => Promise.resolve(new Array(162).fill(new Image())))
 }))
 
 const mockedPreloadImages = vi.mocked(preloadImages)
@@ -36,7 +43,7 @@ const defaultProps = {
 describe('RadarDrawer', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockedPreloadImages.mockResolvedValue(new Array(153).fill(new Image()))
+    mockedPreloadImages.mockResolvedValue(new Array(162).fill(new Image()))
   })
 
   it('renders nothing when isOpen is false', () => {
@@ -71,12 +78,26 @@ describe('RadarDrawer', () => {
     expect(wrapper.emitted('close')).toBeTruthy()
   })
 
-  it('displays 9 tiles in a 3x3 grid', async () => {
+  it('displays 9 cells with base and overlay tiles', async () => {
     const wrapper = mount(RadarDrawer, { props: defaultProps })
     await flushPromises()
 
+    const cells = wrapper.findAll('.radar-tile-cell')
+    expect(cells).toHaveLength(9)
+
     const tiles = wrapper.findAll('.radar-tile')
-    expect(tiles).toHaveLength(9)
+    expect(tiles).toHaveLength(18)
+  })
+
+  it('renders base map tiles from CartoDB', async () => {
+    const wrapper = mount(RadarDrawer, { props: defaultProps })
+    await flushPromises()
+
+    const baseTiles = wrapper.findAll('.radar-tile--base')
+    expect(baseTiles).toHaveLength(9)
+    baseTiles.forEach((tile) => {
+      expect(tile.attributes('src')).toContain('basemaps.cartocdn.com/dark_all')
+    })
   })
 
   it('element picker switches type and triggers reload', async () => {
@@ -84,7 +105,7 @@ describe('RadarDrawer', () => {
     await flushPromises()
 
     mockedPreloadImages.mockClear()
-    mockedPreloadImages.mockResolvedValue(new Array(153).fill(new Image()))
+    mockedPreloadImages.mockResolvedValue(new Array(162).fill(new Image()))
 
     const tempButton = wrapper.findAll('.radar-elements button').find((b) => b.text() === 'TEMP')
     await tempButton!.trigger('click')

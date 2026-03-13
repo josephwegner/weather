@@ -22,6 +22,17 @@ export default defineConfig({
             }
           },
           {
+            urlPattern: /^https:\/\/basemaps\.cartocdn\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'basemap-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 // 24 hours
+              }
+            }
+          },
+          {
             urlPattern: /\/api\/weather\/radar-tile.*/i,
             handler: 'CacheFirst',
             options: {

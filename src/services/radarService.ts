@@ -63,6 +63,19 @@ export function buildTileGrid(
   return urls
 }
 
+export function buildBaseMapGrid(zoom: number, lat: number, lon: number): string[] {
+  const center = latLonToTile(lat, lon, zoom)
+  const urls: string[] = []
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      urls.push(
+        `https://basemaps.cartocdn.com/dark_all/${zoom}/${center.x + dx}/${center.y + dy}@2x.png`
+      )
+    }
+  }
+  return urls
+}
+
 export function preloadImages(urls: string[]): Promise<HTMLImageElement[]> {
   return Promise.all(
     urls.map(

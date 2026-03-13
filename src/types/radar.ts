@@ -1,4 +1,4 @@
-export type RadarElement = 'precipcomposite' | 'temp' | 'wind' | 'windspeed' | 'alerts'
+export type RadarElement = 'precipcomposite' | 'temp' | 'wind' | 'windspeed'
 
 export interface RadarElementOption {
   key: RadarElement

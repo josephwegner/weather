@@ -3,6 +3,7 @@ import {
   generateTimeSteps,
   buildTileUrl,
   buildTileGrid,
+  buildBaseMapGrid,
   latLonToTile,
   preloadImages
 } from '../../services/radarService'
@@ -84,6 +85,28 @@ describe('radarService', () => {
       expect(urls[0]).toContain('y=94')
       expect(urls[8]).toContain('x=66')
       expect(urls[8]).toContain('y=96')
+    })
+  })
+
+  describe('buildBaseMapGrid', () => {
+    it('returns 9 base map URLs (3x3 grid)', () => {
+      const urls = buildBaseMapGrid(8, 41.8781, -87.6298)
+      expect(urls).toHaveLength(9)
+    })
+
+    it('uses CartoDB dark_all tiles', () => {
+      const urls = buildBaseMapGrid(8, 41.8781, -87.6298)
+      urls.forEach((url) => {
+        expect(url).toMatch(/^https:\/\/basemaps\.cartocdn\.com\/dark_all\//)
+        expect(url).toContain('@2x.png')
+      })
+    })
+
+    it('includes correct tile coordinates', () => {
+      const urls = buildBaseMapGrid(8, 41.8781, -87.6298)
+      expect(urls[0]).toContain('/8/64/94@2x.png')
+      expect(urls[4]).toContain('/8/65/95@2x.png')
+      expect(urls[8]).toContain('/8/66/96@2x.png')
     })
   })
 
