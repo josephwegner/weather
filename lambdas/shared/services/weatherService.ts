@@ -10,6 +10,14 @@ export interface Location {
   lng: string
 }
 
+export interface RadarTileParams {
+  element: string
+  z: number
+  x: number
+  y: number
+  time: string
+}
+
 export class WeatherService {
   private config: WeatherConfig
 
@@ -63,5 +71,25 @@ export class WeatherService {
     )
 
     return response.data
+  }
+
+  async getRadarTile(params: RadarTileParams): Promise<{ data: Buffer; contentType: string }> {
+    const response = await axios.get(
+      `https://maps.visualcrossing.com/VisualCrossingWebServices/rest/api/v1/map/tile/${params.element}/${params.z}/${params.x}/${params.y}.webp`,
+      {
+        params: {
+          apikey: this.config.apiKey,
+          time: params.time,
+          unitGroup: 'us',
+          strict: 'false'
+        },
+        responseType: 'arraybuffer'
+      }
+    )
+
+    return {
+      data: response.data,
+      contentType: response.headers['content-type'] || 'image/webp'
+    }
   }
 }
