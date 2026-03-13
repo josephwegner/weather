@@ -27,7 +27,7 @@
         <i
           :class="`wi ${weatherIconClass}`"
           class="weather-icon"
-          :title="dayForecast.description"
+          :title="translateConditionIds(dayForecast.description)"
         ></i>
       </div>
 
@@ -114,6 +114,7 @@
   import type { MetricType, MetricOption } from '../types/metrics'
   import { useWeatherStore } from '../stores/weather'
   import { getWeatherCategory, getWeatherIconClass } from '../utils/weatherConditions'
+  import { translateConditionIds } from '../utils/conditionTranslations'
   import MetricToggle from './MetricToggle.vue'
   import HourlyForecastRow from './HourlyForecastRow.vue'
   import type { TemperatureRangePosition } from '../utils/temperatureRange'

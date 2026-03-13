@@ -48,8 +48,8 @@ export const TEST_WEATHER_DATA = {
     windDirection: 180,
     visibility: 10,
     uvIndex: 3,
-    description: 'partly cloudy',
-    icon: '02d',
+    description: 'type_42',
+    icon: 'partly-cloudy-day',
     timestamp: 1234567890
   } as CurrentWeather,
 
@@ -62,8 +62,8 @@ export const TEST_WEATHER_DATA = {
     precipitationIntensity: 0,
     windSpeed: 8,
     windDirection: 180,
-    description: 'partly cloudy',
-    icon: '02d'
+    description: 'type_42',
+    icon: 'partly-cloudy-day'
   } as HourlyForecast,
 
   DAILY_SAMPLE: {
@@ -77,8 +77,8 @@ export const TEST_WEATHER_DATA = {
     windDirection: 180,
     humidity: 60,
     uvIndex: 4,
-    description: 'partly cloudy',
-    icon: '02d'
+    description: 'type_42',
+    icon: 'partly-cloudy-day'
   } as DailyForecast
 }
 

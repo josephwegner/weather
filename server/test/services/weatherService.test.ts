@@ -39,7 +39,9 @@ describe('WeatherService', () => {
           key: mockConfig.apiKey,
           unitGroup: 'us',
           include: 'current',
-          contentType: 'json'
+          contentType: 'json',
+          iconSet: 'icons2',
+          lang: 'id'
         }
       })
 
@@ -84,7 +86,9 @@ describe('WeatherService', () => {
             key: mockConfig.apiKey,
             unitGroup: 'us',
             include: 'hours',
-            contentType: 'json'
+            contentType: 'json',
+            iconSet: 'icons2',
+            lang: 'id'
           }
         }
       )
@@ -118,7 +122,9 @@ describe('WeatherService', () => {
             key: mockConfig.apiKey,
             unitGroup: 'us',
             include: 'days',
-            contentType: 'json'
+            contentType: 'json',
+            iconSet: 'icons2',
+            lang: 'id'
           }
         }
       )

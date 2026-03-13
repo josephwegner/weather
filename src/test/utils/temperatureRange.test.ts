@@ -15,8 +15,8 @@ describe('Temperature Range Utilities', () => {
       windDirection: 180,
       humidity: 60,
       uvIndex: 5,
-      description: 'sunny',
-      icon: '01d'
+      description: 'type_43',
+      icon: 'clear-day'
     },
     {
       date: '2022-01-02',
@@ -29,8 +29,8 @@ describe('Temperature Range Utilities', () => {
       windDirection: 200,
       humidity: 55,
       uvIndex: 6,
-      description: 'sunny',
-      icon: '01d'
+      description: 'type_43',
+      icon: 'clear-day'
     },
     {
       date: '2022-01-03',
@@ -43,8 +43,8 @@ describe('Temperature Range Utilities', () => {
       windDirection: 150,
       humidity: 75,
       uvIndex: 3,
-      description: 'cloudy',
-      icon: '04d'
+      description: 'type_41',
+      icon: 'cloudy'
     }
   ]
 

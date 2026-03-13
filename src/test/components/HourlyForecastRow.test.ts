@@ -20,8 +20,8 @@ describe('HourlyForecastRow Component', () => {
     uvIndex: 3,
     cloudCover: 40,
     visibility: 10,
-    description: 'partly cloudy',
-    icon: '02d'
+    description: 'type_42',
+    icon: 'partly-cloudy-day'
   }
 
   const availableMetrics = [
@@ -59,7 +59,7 @@ describe('HourlyForecastRow Component', () => {
     })
 
     const row = wrapper.find('.hourly-row')
-    // '02d' should be few-clouds (#94a3b8 = rgb(148, 163, 184))
+    // 'partly-cloudy-day' should be #94a3b8 = rgb(148, 163, 184)
     expect(row.attributes('style')).toContain('border-left-color: rgb(148, 163, 184)')
     expect(row.attributes('style')).toContain('border-left-width: 0.5rem')
   })
@@ -133,13 +133,13 @@ describe('HourlyForecastRow Component', () => {
 
   it('displays different border colors for different weather conditions', () => {
     const weatherConditions = [
-      { icon: '01d', expectedRgb: 'rgb(255, 213, 104)', category: 'clear-day' }, // #ffd568
-      { icon: '01n', expectedRgb: 'rgb(96, 165, 250)', category: 'clear-night' }, // #60a5fa
-      { icon: '02d', expectedRgb: 'rgb(148, 163, 184)', category: 'few-clouds' }, // #94a3b8
-      { icon: '09d', expectedRgb: 'rgb(59, 130, 246)', category: 'light-rain' }, // #3b82f6
-      { icon: '10d', expectedRgb: 'rgb(30, 64, 175)', category: 'heavy-rain' }, // #1e40af
-      { icon: '11d', expectedRgb: 'rgb(139, 92, 246)', category: 'thunderstorm' }, // #8b5cf6
-      { icon: '13d', expectedRgb: 'rgb(226, 232, 240)', category: 'snow' } // #e2e8f0
+      { icon: 'clear-day', expectedRgb: 'rgb(255, 213, 104)' }, // #ffd568
+      { icon: 'clear-night', expectedRgb: 'rgb(96, 165, 250)' }, // #60a5fa
+      { icon: 'partly-cloudy-day', expectedRgb: 'rgb(148, 163, 184)' }, // #94a3b8
+      { icon: 'showers-day', expectedRgb: 'rgb(59, 130, 246)' }, // #3b82f6
+      { icon: 'rain', expectedRgb: 'rgb(30, 64, 175)' }, // #1e40af
+      { icon: 'thunder-showers-day', expectedRgb: 'rgb(139, 92, 246)' }, // #8b5cf6
+      { icon: 'snow', expectedRgb: 'rgb(226, 232, 240)' } // #e2e8f0
     ]
 
     weatherConditions.forEach(({ icon, expectedRgb }) => {
@@ -213,7 +213,7 @@ describe('HourlyForecastRow Component', () => {
     })
 
     const conditionCell = wrapper.find('.hour-condition')
-    expect(conditionCell.text()).toBe('Partly Cloudy')
+    expect(conditionCell.text()).toBe('Partially Cloudy')
   })
 
   it('hides condition label when showConditionLabel is false or undefined', () => {
@@ -229,12 +229,13 @@ describe('HourlyForecastRow Component', () => {
     expect(conditionCell.text()).toBe('')
   })
 
-  it('properly formats different weather descriptions', () => {
+  it('properly translates condition type IDs to labels', () => {
     const testCases = [
-      { description: 'light rain', expected: 'Light Rain' },
-      { description: 'heavy snow', expected: 'Heavy Snow' },
-      { description: 'clear sky', expected: 'Clear Sky' },
-      { description: 'overcast clouds', expected: 'Overcast Clouds' }
+      { description: 'type_26', expected: 'Light Rain' },
+      { description: 'type_34', expected: 'Heavy Snow' },
+      { description: 'type_43', expected: 'Clear' },
+      { description: 'type_41', expected: 'Overcast' },
+      { description: 'type_21,type_41', expected: 'Rain, Overcast' }
     ]
 
     testCases.forEach(({ description, expected }) => {

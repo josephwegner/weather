@@ -23,8 +23,8 @@ describe('DayForecastRow Component', () => {
     windDirection: 180,
     humidity: 60,
     uvIndex: 5,
-    description: 'sunny',
-    icon: '01d'
+    description: 'type_43',
+    icon: 'clear-day'
   }
 
   const sampleHourlyForecast: HourlyForecast[] = Array.from({ length: 24 }, (_, i) => ({
@@ -42,8 +42,8 @@ describe('DayForecastRow Component', () => {
     uvIndex: 3,
     cloudCover: 25,
     visibility: 10,
-    description: 'sunny',
-    icon: '01d'
+    description: 'type_43',
+    icon: 'clear-day'
   }))
 
   beforeEach(() => {
@@ -90,8 +90,8 @@ describe('DayForecastRow Component', () => {
       windDirection: 180,
       humidity: 60,
       uvIndex: 5,
-      description: 'sunny',
-      icon: '01d'
+      description: 'type_43',
+      icon: 'clear-day'
     }
 
     const wrapper = mount(DayForecastRow, {
@@ -313,11 +313,11 @@ describe('DayForecastRow Component', () => {
   it('shows condition labels only when weather conditions change', async () => {
     // Create test data with changing weather conditions
     const testHourlyData = [
-      { timestamp: 1641081600, icon: '01d', description: 'clear sky', temperature: 70 }, // Clear
-      { timestamp: 1641085200, icon: '01d', description: 'clear sky', temperature: 72 }, // Clear (same)
-      { timestamp: 1641088800, icon: '02d', description: 'partly cloudy', temperature: 74 }, // Cloudy (change)
-      { timestamp: 1641092400, icon: '10d', description: 'light rain', temperature: 68 }, // Rain (change)
-      { timestamp: 1641096000, icon: '10d', description: 'light rain', temperature: 66 } // Rain (same)
+      { timestamp: 1641081600, icon: 'clear-day', description: 'type_43', temperature: 70 }, // Clear
+      { timestamp: 1641085200, icon: 'clear-day', description: 'type_43', temperature: 72 }, // Clear (same)
+      { timestamp: 1641088800, icon: 'partly-cloudy-day', description: 'type_42', temperature: 74 }, // Cloudy (change)
+      { timestamp: 1641092400, icon: 'rain', description: 'type_26', temperature: 68 }, // Rain (change)
+      { timestamp: 1641096000, icon: 'rain', description: 'type_26', temperature: 66 } // Rain (same)
     ]
 
     // Mock the hourly data in the store
@@ -339,9 +339,9 @@ describe('DayForecastRow Component', () => {
 
     // Check condition labels - should appear on 1st, 3rd, and 4th rows (condition changes)
     const expectedLabels = [
-      { index: 0, shouldShow: true, expectedText: 'Clear Sky' }, // First row always shows
+      { index: 0, shouldShow: true, expectedText: 'Clear' }, // First row always shows
       { index: 1, shouldShow: false }, // Same as previous (clear)
-      { index: 2, shouldShow: true, expectedText: 'Partly Cloudy' }, // Changed to cloudy
+      { index: 2, shouldShow: true, expectedText: 'Partially Cloudy' }, // Changed to cloudy
       { index: 3, shouldShow: true, expectedText: 'Light Rain' }, // Changed to rain
       { index: 4, shouldShow: false } // Same as previous (rain)
     ]
@@ -363,8 +363,8 @@ describe('DayForecastRow Component', () => {
     const testHourlyData = [
       {
         timestamp: 1641081600,
-        icon: '01d',
-        description: 'clear sky',
+        icon: 'clear-day',
+        description: 'type_43',
         temperature: 70,
         feelsLike: 72,
         humidity: 65,
@@ -396,7 +396,7 @@ describe('DayForecastRow Component', () => {
 
     // Should include time, condition, category, and metric value
     expect(ariaLabel).toContain('12 AM') // Time
-    expect(ariaLabel).toContain('Clear Sky') // Condition
+    expect(ariaLabel).toContain('Clear') // Condition
     expect(ariaLabel).toContain('clear-day conditions') // Category
     expect(ariaLabel).toContain('70°') // Temperature metric
   })
@@ -417,8 +417,8 @@ describe('DayForecastRow Component', () => {
           uvIndex: 2,
           cloudCover: 20,
           visibility: 8,
-          icon: '01d',
-          description: 'clear'
+          icon: 'clear-day',
+          description: 'type_43'
         },
         {
           timestamp: 1641085200,
@@ -433,8 +433,8 @@ describe('DayForecastRow Component', () => {
           uvIndex: 8,
           cloudCover: 60,
           visibility: 12,
-          icon: '01d',
-          description: 'clear'
+          icon: 'clear-day',
+          description: 'type_43'
         },
         {
           timestamp: 1641088800,
@@ -449,8 +449,8 @@ describe('DayForecastRow Component', () => {
           uvIndex: 5,
           cloudCover: 40,
           visibility: 10,
-          icon: '01d',
-          description: 'clear'
+          icon: 'clear-day',
+          description: 'type_43'
         }
       ]
 
@@ -503,24 +503,24 @@ describe('DayForecastRow Component', () => {
           temperature: 65,
           humidity: 50,
           windSpeed: 10,
-          icon: '01d',
-          description: 'clear'
+          icon: 'clear-day',
+          description: 'type_43'
         },
         {
           timestamp: 1641085200,
           temperature: 65,
           humidity: 50,
           windSpeed: 10,
-          icon: '01d',
-          description: 'clear'
+          icon: 'clear-day',
+          description: 'type_43'
         },
         {
           timestamp: 1641088800,
           temperature: 65,
           humidity: 50,
           windSpeed: 10,
-          icon: '01d',
-          description: 'clear'
+          icon: 'clear-day',
+          description: 'type_43'
         }
       ]
 
@@ -565,8 +565,8 @@ describe('DayForecastRow Component', () => {
           uvIndex: 2,
           cloudCover: 20,
           visibility: 8,
-          icon: '01d',
-          description: 'clear'
+          icon: 'clear-day',
+          description: 'type_43'
         },
         {
           timestamp: 1641085200,
@@ -581,8 +581,8 @@ describe('DayForecastRow Component', () => {
           uvIndex: 8,
           cloudCover: 60,
           visibility: 12,
-          icon: '01d',
-          description: 'clear'
+          icon: 'clear-day',
+          description: 'type_43'
         }
       ]
 

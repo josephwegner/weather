@@ -73,25 +73,6 @@ export class WeatherApiService {
     }
   }
 
-  private mapVisualCrossingIcon(vcIcon: string): string {
-    // Map Visual Crossing icons to OpenWeatherMap-compatible icons
-    const iconMap: Record<string, string> = {
-      'clear-day': '01d',
-      'clear-night': '01n',
-      'partly-cloudy-day': '02d',
-      'partly-cloudy-night': '02n',
-      cloudy: '04d',
-      fog: '50d',
-      wind: '50d',
-      rain: '10d',
-      sleet: '13d',
-      snow: '13d',
-      hail: '13d',
-      thunderstorm: '11d'
-    }
-    return iconMap[vcIcon] || '01d'
-  }
-
   async getCurrentWeather(location: Location): Promise<CurrentWeather> {
     this.log('getCurrentWeather called', { location, config: this.config })
 
@@ -131,8 +112,8 @@ export class WeatherApiService {
         windDirection: currentConditions.winddir,
         visibility: Math.round(currentConditions.visibility),
         uvIndex: currentConditions.uvindex || 0,
-        description: currentConditions.conditions.toLowerCase(),
-        icon: this.mapVisualCrossingIcon(currentConditions.icon),
+        description: currentConditions.conditions,
+        icon: currentConditions.icon,
         timestamp: Math.floor(new Date(currentConditions.datetime).getTime() / 1000)
       }
 
@@ -211,8 +192,8 @@ export class WeatherApiService {
           uvIndex: hour.uvindex || 0,
           cloudCover: hour.cloudcover || 0,
           visibility: hour.visibility || 0,
-          description: hour.conditions.toLowerCase(),
-          icon: this.mapVisualCrossingIcon(hour.icon)
+          description: hour.conditions,
+          icon: hour.icon
         }
       })
 
@@ -276,8 +257,8 @@ export class WeatherApiService {
           windDirection: day.winddir,
           humidity: day.humidity,
           uvIndex: day.uvindex || 0,
-          description: day.conditions.toLowerCase(),
-          icon: this.mapVisualCrossingIcon(day.icon)
+          description: day.conditions,
+          icon: day.icon
         })
       )
 

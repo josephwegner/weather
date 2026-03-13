@@ -91,8 +91,8 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 180,
       visibility: 10,
       uvIndex: 3,
-      description: 'partly cloudy',
-      icon: '02d',
+      description: 'type_42',
+      icon: 'partly-cloudy-day',
       timestamp: now
     },
     hourlyForecast: Array.from({ length: 24 }, (_, i) => {
@@ -114,8 +114,8 @@ export const mockScenarios: MockScenario[] = [
         uvIndex: getUVIndexCurve(i, 6),
         cloudCover: getCloudCoverPattern(i, 40, 30),
         visibility: Math.round(Math.max(5, 15 - Math.abs(Math.sin(i * 0.2)) * 5)),
-        description: i < 12 ? 'partly cloudy' : 'clear sky',
-        icon: i < 12 ? '02d' : '01n'
+        description: i < 12 ? 'type_42' : 'type_43',
+        icon: i < 12 ? 'partly-cloudy-day' : 'clear-night'
       }
     }),
     dailyForecast: Array.from({ length: 15 }, (_, i) => ({
@@ -130,10 +130,18 @@ export const mockScenarios: MockScenario[] = [
       humidity: 65 + Math.cos(i * 0.4) * 10,
       uvIndex: 3 + Math.sin(i * 0.6) * 2,
       description:
-        ['partly cloudy', 'sunny', 'cloudy', 'light rain', 'sunny', 'partly cloudy', 'clear sky'][
-          i
-        ] || 'partly cloudy',
-      icon: ['02d', '01d', '04d', '10d', '01d', '02d', '01d'][i] || '02d'
+        ['type_42', 'type_43', 'type_41', 'type_26', 'type_43', 'type_42', 'type_43'][i] ||
+        'type_42',
+      icon:
+        [
+          'partly-cloudy-day',
+          'clear-day',
+          'cloudy',
+          'showers-day',
+          'clear-day',
+          'partly-cloudy-day',
+          'clear-day'
+        ][i] || 'partly-cloudy-day'
     }))
   },
   {
@@ -150,8 +158,8 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 225,
       visibility: 5,
       uvIndex: 11,
-      description: 'clear sky',
-      icon: '01d',
+      description: 'type_43',
+      icon: 'clear-day',
       timestamp: now
     },
     hourlyForecast: Array.from({ length: 24 }, (_, i) => {
@@ -170,9 +178,9 @@ export const mockScenarios: MockScenario[] = [
         pressure: getPressureVariation(i, 1008, 3),
         uvIndex: getUVIndexCurve(i, 10),
         cloudCover: getCloudCoverPattern(i, 5, 10),
-        visibility: Math.round(Math.max(3, 8 - Math.abs(Math.sin(i * 0.3)) * 3)), // Reduced by heat haze
-        description: 'clear sky',
-        icon: i >= 6 && i <= 18 ? '01d' : '01n'
+        visibility: Math.round(Math.max(3, 8 - Math.abs(Math.sin(i * 0.3)) * 3)),
+        description: 'type_43',
+        icon: i >= 6 && i <= 18 ? 'clear-day' : 'clear-night'
       }
     }),
     dailyForecast: Array.from({ length: 15 }, (_, i) => ({
@@ -186,8 +194,8 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 225 + Math.sin(i * 0.1) * 20,
       humidity: 8 + Math.abs(Math.sin(i * 0.4) * 5),
       uvIndex: 11,
-      description: 'clear sky',
-      icon: '01d'
+      description: 'type_43',
+      icon: 'clear-day'
     }))
   },
   {
@@ -204,8 +212,8 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 350,
       visibility: 2,
       uvIndex: 0,
-      description: 'snow',
-      icon: '13d',
+      description: 'type_31',
+      icon: 'snow',
       timestamp: now
     },
     hourlyForecast: Array.from({ length: 24 }, (_, i) => {
@@ -222,11 +230,11 @@ export const mockScenarios: MockScenario[] = [
         windDirection: getWindDirectionShift(i, 350, 20),
         windGust: Math.round(35 + Math.cos(i * 0.12) * 15),
         pressure: getPressureVariation(i, 1035, 8),
-        uvIndex: 0, // No UV in winter/snow
-        cloudCover: getCloudCoverPattern(i, 90, 10), // Heavy overcast
-        visibility: Math.round(Math.max(0.5, 3 - Math.abs(Math.sin(i * 0.4)) * 2)), // Poor visibility in snow
-        description: 'heavy snow',
-        icon: '13d'
+        uvIndex: 0,
+        cloudCover: getCloudCoverPattern(i, 90, 10),
+        visibility: Math.round(Math.max(0.5, 3 - Math.abs(Math.sin(i * 0.4)) * 2)),
+        description: 'type_34',
+        icon: 'snow'
       }
     }),
     dailyForecast: Array.from({ length: 15 }, (_, i) => ({
@@ -240,8 +248,8 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 350 + Math.sin(i * 0.1) * 15,
       humidity: 80 + Math.cos(i * 0.3) * 10,
       uvIndex: 0,
-      description: 'heavy snow',
-      icon: '13d'
+      description: 'type_34',
+      icon: 'snow'
     }))
   },
   {
@@ -258,8 +266,8 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 90,
       visibility: 1,
       uvIndex: 0,
-      description: 'heavy intensity rain',
-      icon: '10d',
+      description: 'type_25',
+      icon: 'rain',
       timestamp: now
     },
     hourlyForecast: Array.from({ length: 24 }, (_, i) => {
@@ -270,17 +278,17 @@ export const mockScenarios: MockScenario[] = [
         feelsLike: temp + 9 + getDailyTemperatureCurve(i, 0, 2),
         humidity: getHumidityPattern(i, 92, 5),
         precipitationProbability: 100,
-        precipitationIntensity: 1.5 + Math.cos(i * 0.4) * 0.8, // Heavy rain in inches
+        precipitationIntensity: 1.5 + Math.cos(i * 0.4) * 0.8,
         precipitationType: 'rain',
         windSpeed: Math.round(75 + Math.sin(i * 0.25) * 15),
         windDirection: getWindDirectionShift(i, 90, 60),
-        windGust: Math.round(100 + Math.sin(i * 0.2) * 20), // Hurricane force gusts
-        pressure: getPressureVariation(i, 950, 10), // Very low pressure
-        uvIndex: 0, // No UV during hurricane
-        cloudCover: 100, // Complete overcast
-        visibility: Math.round(Math.max(0.25, 1.5 - Math.abs(Math.sin(i * 0.5)) * 1)), // Very poor visibility
-        description: 'heavy intensity rain',
-        icon: '10d'
+        windGust: Math.round(100 + Math.sin(i * 0.2) * 20),
+        pressure: getPressureVariation(i, 950, 10),
+        uvIndex: 0,
+        cloudCover: 100,
+        visibility: Math.round(Math.max(0.25, 1.5 - Math.abs(Math.sin(i * 0.5)) * 1)),
+        description: 'type_25',
+        icon: 'rain'
       }
     }),
     dailyForecast: Array.from({ length: 15 }, (_, i) => ({
@@ -294,8 +302,8 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 90 + Math.sin(i * 0.1) * 40,
       humidity: 95 + Math.cos(i * 0.2) * 3,
       uvIndex: 0,
-      description: 'heavy intensity rain',
-      icon: '10d'
+      description: 'type_25',
+      icon: 'rain'
     }))
   },
   {
@@ -313,14 +321,13 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 200,
       visibility: 8,
       uvIndex: 4,
-      description: 'overcast clouds',
-      icon: '04d',
+      description: 'type_41',
+      icon: 'cloudy',
       timestamp: now
     },
     hourlyForecast: Array.from({ length: 24 }, (_, i) => {
-      // Create different weather patterns throughout the day
-      let description = 'clear sky'
-      let icon = '01d'
+      let description = 'type_43'
+      let icon = 'clear-day'
       let precipType: string | undefined = undefined
       let precipProb = 0
       let precipIntensity = 0
@@ -328,15 +335,15 @@ export const mockScenarios: MockScenario[] = [
 
       // Morning: Overcast and cool
       if (i >= 6 && i < 10) {
-        description = 'overcast clouds'
-        icon = '04d'
+        description = 'type_41'
+        icon = 'cloudy'
         cloudCover = 90
         precipProb = 20
       }
       // Late morning to early afternoon: Rain
       else if (i >= 10 && i < 14) {
-        description = 'moderate rain'
-        icon = '10d'
+        description = 'type_21'
+        icon = 'showers-day'
         precipType = 'rain'
         precipProb = 85
         precipIntensity = 0.3 + Math.random() * 0.4
@@ -344,30 +351,30 @@ export const mockScenarios: MockScenario[] = [
       }
       // Mid afternoon: Clearing up
       else if (i >= 14 && i < 17) {
-        description = 'partly cloudy'
-        icon = '02d'
+        description = 'type_42'
+        icon = 'partly-cloudy-day'
         cloudCover = 40
         precipProb = 10
       }
       // Late afternoon to evening: Sunny
       else if (i >= 17 && i < 20) {
-        description = 'clear sky'
-        icon = '01d'
+        description = 'type_43'
+        icon = 'clear-day'
         cloudCover = 10
         precipProb = 0
       }
       // Evening to night: Light snow (if cold enough)
       else if (i >= 20 || i < 6) {
         if (i >= 22 || i < 4) {
-          description = 'light snow'
-          icon = '13n'
+          description = 'type_35'
+          icon = 'snow-showers-night'
           precipType = 'snow'
           precipProb = 60
           precipIntensity = 0.1 + Math.random() * 0.2
           cloudCover = 80
         } else {
-          description = 'partly cloudy'
-          icon = i < 6 ? '02n' : '02d'
+          description = 'type_42'
+          icon = i < 6 ? 'partly-cloudy-night' : 'partly-cloudy-day'
           cloudCover = 50
           precipProb = 15
         }
@@ -405,59 +412,58 @@ export const mockScenarios: MockScenario[] = [
       }
     }),
     dailyForecast: Array.from({ length: 7 }, (_, i) => {
-      // Create varied daily forecasts
       const weatherPatterns = [
         {
-          desc: 'light rain',
-          icon: '10d',
+          desc: 'type_26',
+          icon: 'showers-day',
           precipProb: 70,
           precipIntensity: 0.2,
           highTemp: 68,
           lowTemp: 52
         },
         {
-          desc: 'sunny',
-          icon: '01d',
+          desc: 'type_43',
+          icon: 'clear-day',
           precipProb: 0,
           precipIntensity: 0,
           highTemp: 78,
           lowTemp: 58
         },
         {
-          desc: 'partly cloudy',
-          icon: '02d',
+          desc: 'type_42',
+          icon: 'partly-cloudy-day',
           precipProb: 20,
           precipIntensity: 0,
           highTemp: 72,
           lowTemp: 55
         },
         {
-          desc: 'heavy rain',
-          icon: '10d',
+          desc: 'type_25',
+          icon: 'rain',
           precipProb: 95,
           precipIntensity: 0.8,
           highTemp: 65,
           lowTemp: 48
         },
         {
-          desc: 'snow',
-          icon: '13d',
+          desc: 'type_31',
+          icon: 'snow',
           precipProb: 80,
           precipIntensity: 0.5,
           highTemp: 38,
           lowTemp: 25
         },
         {
-          desc: 'clear sky',
-          icon: '01d',
+          desc: 'type_43',
+          icon: 'clear-day',
           precipProb: 5,
           precipIntensity: 0,
           highTemp: 75,
           lowTemp: 60
         },
         {
-          desc: 'overcast clouds',
-          icon: '04d',
+          desc: 'type_41',
+          icon: 'cloudy',
           precipProb: 30,
           precipIntensity: 0,
           highTemp: 70,
@@ -477,15 +483,13 @@ export const mockScenarios: MockScenario[] = [
         windSpeed: 10 + Math.cos(i * 0.3) * 5,
         windDirection: 200 + Math.sin(i * 0.2) * 30,
         humidity:
-          pattern.desc.includes('rain') || pattern.desc.includes('snow')
+          pattern.desc.includes('21') ||
+          pattern.desc.includes('25') ||
+          pattern.desc.includes('26') ||
+          pattern.desc.includes('31')
             ? 80 + Math.cos(i * 0.4) * 10
             : 60 + Math.cos(i * 0.4) * 15,
-        uvIndex:
-          pattern.desc === 'sunny' || pattern.desc === 'clear sky'
-            ? 7
-            : pattern.desc === 'partly cloudy'
-              ? 4
-              : 1,
+        uvIndex: pattern.desc === 'type_43' ? 7 : pattern.desc === 'type_42' ? 4 : 1,
         description: pattern.desc,
         icon: pattern.icon
       }
@@ -505,7 +509,7 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 0,
       visibility: 0,
       uvIndex: 0,
-      description: 'unknown',
+      description: '',
       icon: '',
       timestamp: now
     },
@@ -530,7 +534,7 @@ export const mockScenarios: MockScenario[] = [
     dailyForecast: Array.from({ length: 3 }, (_, i) => ({
       date: new Date(Date.now() + i * 86400000).toISOString().split('T')[0],
       timestamp: now + i * 86400,
-      temperatureHigh: i < 2 ? 70 + i * 5 : 0, // Missing data for day 3
+      temperatureHigh: i < 2 ? 70 + i * 5 : 0,
       temperatureLow: i < 2 ? 50 + i * 3 : 0,
       precipitationProbability: 0,
       precipitationIntensity: 0,
@@ -538,8 +542,8 @@ export const mockScenarios: MockScenario[] = [
       windDirection: 0,
       humidity: 0,
       uvIndex: 0,
-      description: i === 0 ? 'unknown' : '',
-      icon: i === 0 ? '' : ''
+      description: '',
+      icon: ''
     }))
   }
 ]

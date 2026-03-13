@@ -122,8 +122,8 @@ describe('Cache Service', () => {
           windDirection: 200,
           humidity: 65,
           uvIndex: 6,
-          description: 'cloudy',
-          icon: '04d'
+          description: 'type_41',
+          icon: 'cloudy'
         }
       ]
 
@@ -141,8 +141,8 @@ describe('Cache Service', () => {
         uvIndex: 3,
         cloudCover: 20,
         visibility: 10,
-        description: 'sunny',
-        icon: '01d'
+        description: 'type_43',
+        icon: 'clear-day'
       }))
 
       cacheService.setDailyForecast(TEST_LOCATIONS.CHICAGO, dailyForecast)

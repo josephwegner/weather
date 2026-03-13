@@ -24,8 +24,8 @@ describe('WeeklyForecast Component', () => {
       windDirection: 180,
       humidity: 60,
       uvIndex: 5,
-      description: 'sunny',
-      icon: '01d'
+      description: 'type_43',
+      icon: 'clear-day'
     },
     {
       date: '2022-01-02',
@@ -38,8 +38,8 @@ describe('WeeklyForecast Component', () => {
       windDirection: 200,
       humidity: 65,
       uvIndex: 6,
-      description: 'partly cloudy',
-      icon: '02d'
+      description: 'type_42',
+      icon: 'partly-cloudy-day'
     }
   ]
 

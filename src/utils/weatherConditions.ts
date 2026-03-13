@@ -1,15 +1,22 @@
+import { translateConditionIds } from './conditionTranslations'
+
 export type WeatherCategory =
   | 'clear-day'
   | 'clear-night'
-  | 'few-clouds'
-  | 'scattered-clouds'
-  | 'broken-clouds'
-  | 'overcast-clouds'
-  | 'mist'
-  | 'light-rain'
-  | 'heavy-rain'
+  | 'partly-cloudy-day'
+  | 'partly-cloudy-night'
+  | 'cloudy'
+  | 'fog'
+  | 'wind'
+  | 'rain'
+  | 'showers-day'
+  | 'showers-night'
   | 'snow'
-  | 'thunderstorm'
+  | 'snow-showers-day'
+  | 'snow-showers-night'
+  | 'thunder-rain'
+  | 'thunder-showers-day'
+  | 'thunder-showers-night'
 
 export interface WeatherCondition {
   category: WeatherCategory
@@ -18,82 +25,57 @@ export interface WeatherCondition {
 }
 
 const weatherColorMap: Record<WeatherCategory, string> = {
-  'clear-day': '#ffd568', // Bright yellow-orange for sunny day
-  'clear-night': '#60a5fa', // Soft blue for clear night
-  'few-clouds': '#94a3b8', // Light gray for few clouds
-  'scattered-clouds': '#64748b', // Medium gray for scattered clouds
-  'broken-clouds': '#475569', // Darker gray for broken clouds
-  'overcast-clouds': '#334155', // Dark gray for overcast
-  mist: '#9ca3af', // Muted gray for mist/fog
-  'light-rain': '#3b82f6', // Blue for light rain
-  'heavy-rain': '#1e40af', // Darker blue for heavy rain
-  snow: '#e2e8f0', // Light gray/white for snow
-  thunderstorm: '#8b5cf6' // Purple for storms
+  'clear-day': '#ffd568',
+  'clear-night': '#60a5fa',
+  'partly-cloudy-day': '#94a3b8',
+  'partly-cloudy-night': '#64748b',
+  cloudy: '#475569',
+  fog: '#9ca3af',
+  wind: '#78909c',
+  rain: '#1e40af',
+  'showers-day': '#3b82f6',
+  'showers-night': '#2563eb',
+  snow: '#e2e8f0',
+  'snow-showers-day': '#cbd5e1',
+  'snow-showers-night': '#94a3b8',
+  'thunder-rain': '#7c3aed',
+  'thunder-showers-day': '#8b5cf6',
+  'thunder-showers-night': '#6d28d9'
 }
 
 const weatherIconClassMap: Record<WeatherCategory, string> = {
   'clear-day': 'wi-day-sunny',
   'clear-night': 'wi-night-clear',
-  'few-clouds': 'wi-day-cloudy',
-  'scattered-clouds': 'wi-cloudy',
-  'broken-clouds': 'wi-cloudy',
-  'overcast-clouds': 'wi-cloudy',
-  mist: 'wi-fog',
-  'light-rain': 'wi-rain',
-  'heavy-rain': 'wi-rain',
+  'partly-cloudy-day': 'wi-day-cloudy',
+  'partly-cloudy-night': 'wi-night-alt-cloudy',
+  cloudy: 'wi-cloudy',
+  fog: 'wi-fog',
+  wind: 'wi-strong-wind',
+  rain: 'wi-rain',
+  'showers-day': 'wi-day-showers',
+  'showers-night': 'wi-night-alt-showers',
   snow: 'wi-snow',
-  thunderstorm: 'wi-thunderstorm'
+  'snow-showers-day': 'wi-day-snow',
+  'snow-showers-night': 'wi-night-alt-snow',
+  'thunder-rain': 'wi-thunderstorm',
+  'thunder-showers-day': 'wi-day-thunderstorm',
+  'thunder-showers-night': 'wi-night-alt-thunderstorm'
 }
 
-const iconCategoryMap: Record<string, WeatherCategory> = {
-  // Clear sky - differentiate day/night
-  '01d': 'clear-day',
-  '01n': 'clear-night',
+const DEFAULT_CATEGORY: WeatherCategory = 'cloudy'
 
-  // Few clouds
-  '02d': 'few-clouds',
-  '02n': 'few-clouds',
-
-  // Scattered clouds
-  '03d': 'scattered-clouds',
-  '03n': 'scattered-clouds',
-
-  // Broken clouds
-  '04d': 'broken-clouds',
-  '04n': 'broken-clouds',
-
-  // Mist
-  '50d': 'mist',
-  '50n': 'mist',
-
-  // Light rain (shower rain)
-  '09d': 'light-rain',
-  '09n': 'light-rain',
-
-  // Heavy rain
-  '10d': 'heavy-rain',
-  '10n': 'heavy-rain',
-
-  // Thunderstorm
-  '11d': 'thunderstorm',
-  '11n': 'thunderstorm',
-
-  // Snow
-  '13d': 'snow',
-  '13n': 'snow'
-}
+const validCategories = new Set<string>(Object.keys(weatherColorMap))
 
 export function getWeatherCondition(icon: string): WeatherCondition {
-  // Handle null, undefined, or empty string
-  if (!icon || typeof icon !== 'string') {
+  if (!icon || typeof icon !== 'string' || !validCategories.has(icon)) {
     return {
-      category: 'overcast-clouds',
-      color: weatherColorMap['overcast-clouds'],
-      iconClass: weatherIconClassMap['overcast-clouds']
+      category: DEFAULT_CATEGORY,
+      color: weatherColorMap[DEFAULT_CATEGORY],
+      iconClass: weatherIconClassMap[DEFAULT_CATEGORY]
     }
   }
 
-  const category = iconCategoryMap[icon] || 'overcast-clouds' // Default to overcast-clouds if unknown
+  const category = icon as WeatherCategory
   return {
     category,
     color: weatherColorMap[category],
@@ -113,43 +95,7 @@ export function getWeatherIconClass(icon: string): string {
   return getWeatherCondition(icon).iconClass
 }
 
-export function getConditionLabel(description: string, category: WeatherCategory): string {
-  if (!description || typeof description !== 'string') {
-    return getCategoryLabel(category)
-  }
-
-  // Capitalize the first letter of each word
-  return description
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-}
-
-function getCategoryLabel(category: WeatherCategory): string {
-  switch (category) {
-    case 'clear-day':
-      return 'Clear'
-    case 'clear-night':
-      return 'Clear'
-    case 'few-clouds':
-      return 'Few Clouds'
-    case 'scattered-clouds':
-      return 'Scattered Clouds'
-    case 'broken-clouds':
-      return 'Broken Clouds'
-    case 'overcast-clouds':
-      return 'Overcast'
-    case 'mist':
-      return 'Mist'
-    case 'light-rain':
-      return 'Light Rain'
-    case 'heavy-rain':
-      return 'Heavy Rain'
-    case 'snow':
-      return 'Snow'
-    case 'thunderstorm':
-      return 'Thunderstorm'
-    default:
-      return ''
-  }
+export function getConditionLabel(description: string, _category: WeatherCategory): string {
+  if (!description || typeof description !== 'string') return ''
+  return translateConditionIds(description)
 }

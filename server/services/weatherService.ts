@@ -25,7 +25,9 @@ export class WeatherService {
         key: this.config.apiKey,
         unitGroup: 'us',
         include: 'current',
-        contentType: 'json'
+        contentType: 'json',
+        iconSet: 'icons2',
+        lang: 'id'
       }
     })
 
@@ -40,7 +42,9 @@ export class WeatherService {
         key: this.config.apiKey,
         unitGroup: 'us',
         include: 'hours',
-        contentType: 'json'
+        contentType: 'json',
+        iconSet: 'icons2',
+        lang: 'id'
       }
     })
 
@@ -57,7 +61,9 @@ export class WeatherService {
           key: this.config.apiKey,
           unitGroup: 'us',
           include: 'days',
-          contentType: 'json'
+          contentType: 'json',
+          iconSet: 'icons2',
+          lang: 'id'
         }
       }
     )

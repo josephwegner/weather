@@ -44,7 +44,7 @@ describe('Weather API Service', () => {
       const result = await weatherApi.getCurrentWeather(testLocation)
 
       expect(result.temperature).toBe(72)
-      expect(result.description).toBe('partly cloudy')
+      expect(result.description).toBe('type_42')
       expect(mockedAxios.get).not.toHaveBeenCalled()
     })
   })
@@ -60,8 +60,8 @@ describe('Weather API Service', () => {
         windDirection: 90,
         visibility: 10,
         uvIndex: 4,
-        description: 'sunny',
-        icon: '01d',
+        description: 'type_43',
+        icon: 'clear-day',
         timestamp: Date.now()
       }
 
@@ -99,8 +99,8 @@ describe('Weather API Service', () => {
       const result = await weatherApi.getCurrentWeather(testLocation)
 
       expect(result.temperature).toBe(75)
-      expect(result.description).toBe('clear sky')
-      expect(result.icon).toBe('01d')
+      expect(result.description).toBe('Clear sky')
+      expect(result.icon).toBe('clear-day')
       expect(mockedAxios.get).toHaveBeenCalledOnce()
       expect(mockedCache.setCurrentWeather).toHaveBeenCalledWith(testLocation, result)
     })
@@ -116,7 +116,7 @@ describe('Weather API Service', () => {
       const result = await weatherApi.getCurrentWeather(testLocation)
 
       expect(result.temperature).toBe(72)
-      expect(result.description).toBe('partly cloudy')
+      expect(result.description).toBe('type_42')
       expect(mockedAxios.get).not.toHaveBeenCalled()
     })
 
@@ -130,8 +130,8 @@ describe('Weather API Service', () => {
         windDirection: 90,
         visibility: 10,
         uvIndex: 4,
-        description: 'sunny',
-        icon: '01d',
+        description: 'type_43',
+        icon: 'clear-day',
         timestamp: Date.now()
       }
 
@@ -175,8 +175,8 @@ describe('Weather API Service', () => {
         windDirection: 200,
         visibility: 10,
         uvIndex: 2,
-        description: 'cloudy',
-        icon: '04d',
+        description: 'type_41',
+        icon: 'cloudy',
         timestamp: Date.now()
       }
 
@@ -239,8 +239,8 @@ describe('Weather API Service', () => {
         windDirection: 180,
         humidity: 60,
         uvIndex: 5,
-        description: 'sunny',
-        icon: '01d'
+        description: 'Sunny',
+        icon: 'clear-day'
       })
       expect(mockedCache.setDailyForecast).toHaveBeenCalledWith(TEST_LOCATIONS.CHICAGO, result)
     })
@@ -258,8 +258,8 @@ describe('Weather API Service', () => {
           windDirection: 200,
           humidity: 65,
           uvIndex: 6,
-          description: 'cloudy',
-          icon: '04d'
+          description: 'type_41',
+          icon: 'cloudy'
         }
       ]
 
@@ -337,8 +337,8 @@ describe('Weather API Service', () => {
         uvIndex: 0,
         cloudCover: 0,
         visibility: 0,
-        description: 'partly cloudy',
-        icon: '02d'
+        description: 'Partly cloudy',
+        icon: 'partly-cloudy-day'
       })
       expect(mockedCache.setHourlyForecastForDay).toHaveBeenCalledWith(
         TEST_LOCATIONS.CHICAGO,
@@ -362,8 +362,8 @@ describe('Weather API Service', () => {
         uvIndex: 3,
         cloudCover: 20,
         visibility: 10,
-        description: 'sunny',
-        icon: '01d'
+        description: 'type_43',
+        icon: 'clear-day'
       }))
 
       mockedCache.getHourlyForecastForDay.mockReturnValue(cachedHourly)
