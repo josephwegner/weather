@@ -16,8 +16,9 @@ output "s3_bucket" {
 output "lambda_functions" {
   description = "Lambda function names"
   value = {
-    current_weather = module.lambdas["current"].function_name
-    hourly_forecast = module.lambdas["hourly"].function_name
-    daily_forecast  = module.lambdas["daily"].function_name
+    current_weather = module.lambdas["get-current-weather"].function_name
+    hourly_forecast = module.lambdas["get-hourly-forecast"].function_name
+    daily_forecast  = module.lambdas["get-daily-forecast"].function_name
+    radar_tile      = module.lambdas["get-radar-tile"].function_name
   }
 }

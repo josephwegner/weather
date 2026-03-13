@@ -162,7 +162,7 @@ describe('radarService', () => {
       const urls = ['/img1.webp']
       const promise = preloadImages(urls)
 
-      errorHandler?.(new Error('load failed'))
+      ;(errorHandler as ((err: any) => void) | null)?.(new Error('load failed'))
 
       await expect(promise).rejects.toThrow()
     })

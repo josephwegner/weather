@@ -42,9 +42,10 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
 module "lambdas" {
   source   = "git::https://github.com/josephwegner/family-paas.git//terraform/modules/lambda-function?ref=main"
   for_each = {
-    "current" = { s3_key = "${var.app_name}/${var.environment}/get-current-weather.zip" }
-    "hourly"  = { s3_key = "${var.app_name}/${var.environment}/get-hourly-forecast.zip" }
-    "daily"   = { s3_key = "${var.app_name}/${var.environment}/get-daily-forecast.zip" }
+    "get-current-weather" = { s3_key = "${var.app_name}/${var.environment}/get-current-weather.zip" }
+    "get-hourly-forecast" = { s3_key = "${var.app_name}/${var.environment}/get-hourly-forecast.zip" }
+    "get-daily-forecast"  = { s3_key = "${var.app_name}/${var.environment}/get-daily-forecast.zip" }
+    "get-radar-tile"      = { s3_key = "${var.app_name}/${var.environment}/get-radar-tile.zip" }
   }
 
   function_name         = each.key
@@ -64,9 +65,10 @@ module "api" {
   app_name    = var.app_name
   environment = var.environment
   routes = [
-    { route_key = "GET /api/weather/current/{lat}/{lng}", function_arn = module.lambdas["current"].invoke_arn, function_name = module.lambdas["current"].function_name },
-    { route_key = "GET /api/weather/hourly/{lat}/{lng}/{date}", function_arn = module.lambdas["hourly"].invoke_arn, function_name = module.lambdas["hourly"].function_name },
-    { route_key = "GET /api/weather/daily/{lat}/{lng}/{startDate}/{endDate}", function_arn = module.lambdas["daily"].invoke_arn, function_name = module.lambdas["daily"].function_name },
+    { route_key = "GET /api/weather/current/{lat}/{lng}", function_arn = module.lambdas["get-current-weather"].invoke_arn, function_name = module.lambdas["get-current-weather"].function_name },
+    { route_key = "GET /api/weather/hourly/{lat}/{lng}/{date}", function_arn = module.lambdas["get-hourly-forecast"].invoke_arn, function_name = module.lambdas["get-hourly-forecast"].function_name },
+    { route_key = "GET /api/weather/daily/{lat}/{lng}/{startDate}/{endDate}", function_arn = module.lambdas["get-daily-forecast"].invoke_arn, function_name = module.lambdas["get-daily-forecast"].function_name },
+    { route_key = "GET /api/weather/radar-tile", function_arn = module.lambdas["get-radar-tile"].invoke_arn, function_name = module.lambdas["get-radar-tile"].function_name },
   ]
 }
 
