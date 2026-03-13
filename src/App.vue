@@ -132,7 +132,7 @@
               {{ weatherStore.error }}
             </div>
             <div v-else-if="weatherStore.currentWeather" class="text-slate-300">
-              {{ weatherStore.currentWeather.description }}
+              {{ translateConditionIds(weatherStore.currentWeather.description) }}
             </div>
             <div v-else class="text-slate-300">No weather data available</div>
           </div>
@@ -155,6 +155,7 @@
   import WeeklyForecast from './components/WeeklyForecast.vue'
   import LocationSearch from './components/LocationSearch.vue'
   import RadarDrawer from './components/RadarDrawer.vue'
+  import { translateConditionIds } from './utils/conditionTranslations'
 
   const weatherStore = useWeatherStore()
   const isRadarOpen = ref(false)
