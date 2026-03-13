@@ -81,11 +81,11 @@
       "eslint --fix",
       "prettier --check"
     ],
-    "server/**/*.ts": [
+    "lambdas/**/*.ts": [
       "eslint --fix",
       "prettier --check"
     ],
-    "{src,server}/**/*.{ts,vue}": [
+    "{src,lambdas}/**/*.{ts,vue}": [
       "bash -c 'npm run test:client'"
     ]
   }

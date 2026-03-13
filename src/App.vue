@@ -8,6 +8,12 @@
   >
     <div class="max-w-md mx-auto">
       <main>
+        <RadarDrawer
+          :is-open="isRadarOpen"
+          :location="weatherStore.currentLocation"
+          @close="isRadarOpen = false"
+        />
+
         <!-- Pull to Refresh Indicator -->
         <div
           class="pull-refresh-indicator"
@@ -58,27 +64,41 @@
 
         <!-- Location Search Section -->
         <div class="bg-slate-800 p-4">
-          <!-- Search bar style location picker -->
-          <div class="relative">
-            <input
-              v-model="locationDisplayText"
-              @click="showLocationSearch = true"
-              @focus="showLocationSearch = true"
-              type="text"
-              readonly
-              :placeholder="weatherStore.currentLocation.name || 'Choose location...'"
-              class="w-full py-2 pl-4 pr-16 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-400 text-sm cursor-pointer"
-            />
-            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+          <!-- Search bar + radar icon -->
+          <div class="flex items-center gap-2">
+            <div class="relative flex-1">
+              <input
+                v-model="locationDisplayText"
+                @click="showLocationSearch = true"
+                @focus="showLocationSearch = true"
+                type="text"
+                readonly
+                :placeholder="weatherStore.currentLocation.name || 'Choose location...'"
+                class="w-full py-2 pl-4 pr-10 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-400 text-sm cursor-pointer"
+              />
+              <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
             </div>
+            <button
+              class="radar-toggle"
+              @click.stop="isRadarOpen = !isRadarOpen"
+              aria-label="Open radar map"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke-width="2" />
+                <circle cx="12" cy="12" r="6" stroke-width="2" />
+                <circle cx="12" cy="12" r="2" stroke-width="2" />
+                <path stroke-width="2" d="M12 2v4M12 18v4" />
+              </svg>
+            </button>
           </div>
 
           <!-- Location Search Modal -->
@@ -134,8 +154,10 @@
   import { cacheService } from './services/cache'
   import WeeklyForecast from './components/WeeklyForecast.vue'
   import LocationSearch from './components/LocationSearch.vue'
+  import RadarDrawer from './components/RadarDrawer.vue'
 
   const weatherStore = useWeatherStore()
+  const isRadarOpen = ref(false)
   const showLocationSearch = ref(false)
   const selectedLocation = ref<Location | null>(null)
   const locationDisplayText = ref('')
@@ -228,6 +250,19 @@
 </script>
 
 <style scoped>
+  .radar-toggle {
+    flex-shrink: 0;
+    color: rgb(148, 163, 184);
+    padding: 6px;
+    border-radius: 8px;
+    background: rgb(51, 65, 85);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .pull-refresh-indicator {
     overflow: hidden;
     display: flex;

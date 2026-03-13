@@ -22,12 +22,12 @@ export default defineConfig({
             }
           },
           {
-            urlPattern: /^https:\/\/tilecache\.rainviewer\.com\/.*/i,
+            urlPattern: /\/api\/weather\/radar-tile.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'radar-cache',
               expiration: {
-                maxEntries: 100,
+                maxEntries: 200,
                 maxAgeSeconds: 60 * 60 * 1 // 1 hour
               }
             }

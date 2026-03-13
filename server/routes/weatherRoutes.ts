@@ -40,5 +40,31 @@ export function createWeatherRoutes(weatherService: WeatherService): Router {
     }
   })
 
+  router.get('/radar-tile', async (req: Request, res: Response) => {
+    try {
+      const { element, z, x, y, time } = req.query
+
+      if (!element || !z || !x || !y || !time) {
+        res.status(400).json({ error: 'Missing required query parameters' })
+        return
+      }
+
+      const result = await weatherService.getRadarTile({
+        element: element as string,
+        z: Number(z),
+        x: Number(x),
+        y: Number(y),
+        time: time as string
+      })
+
+      res.set('Content-Type', result.contentType)
+      res.set('Cache-Control', 'public, max-age=900')
+      res.send(result.data)
+    } catch (error) {
+      console.error('Error fetching radar tile:', error)
+      res.status(500).json({ error: 'Failed to fetch radar tile' })
+    }
+  })
+
   return router
 }

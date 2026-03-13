@@ -22,6 +22,10 @@ vi.mock('../../components/LocationSearch.vue', () => ({
   default: { template: '<div>Location Search</div>' }
 }))
 
+vi.mock('../../components/RadarDrawer.vue', () => ({
+  default: { template: '<div class="radar-drawer-mock"></div>', props: ['isOpen', 'location'] }
+}))
+
 describe('Pull to Refresh', () => {
   let mockStore: any
 
@@ -146,6 +150,18 @@ describe('Pull to Refresh', () => {
     await app.trigger('touchmove', { touches: [{ clientY: 260 }] })
 
     expect(wrapper.find('.pull-refresh-arrow--flipped').exists()).toBe(true)
+  })
+
+  it('radar icon button exists in the DOM', () => {
+    const wrapper = mount(App)
+    expect(wrapper.find('.radar-toggle').exists()).toBe(true)
+  })
+
+  it('clicking radar icon opens the radar drawer', async () => {
+    const wrapper = mount(App)
+    await wrapper.find('.radar-toggle').trigger('click')
+    const drawer = wrapper.findComponent({ name: 'RadarDrawer' })
+    expect(drawer.exists()).toBe(true)
   })
 
   it('resets indicator after refresh completes', async () => {

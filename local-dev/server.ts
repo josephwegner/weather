@@ -37,6 +37,39 @@ app.get('/api/weather/daily/:lat/:lng/:startDate/:endDate', async (req, res) => 
   await simulateLambda(dailyHandler, req, res)
 })
 
+app.get('/api/weather/radar-tile', async (req, res) => {
+  try {
+    const qs = req.query as Record<string, string>
+    const { element, z, x, y, time } = qs
+
+    if (!element || !z || !x || !y || !time) {
+      res.status(400).json({ error: 'Missing required query parameters' })
+      return
+    }
+
+    const { WeatherService } = await import('../lambdas/shared/services/weatherService')
+    const service = new WeatherService({
+      apiKey: process.env.VISUAL_CROSSING_API_KEY!,
+      baseUrl: process.env.VISUAL_CROSSING_BASE_URL!
+    })
+
+    const result = await service.getRadarTile({
+      element,
+      z: Number(z),
+      x: Number(x),
+      y: Number(y),
+      time
+    })
+
+    res.set('Content-Type', result.contentType)
+    res.set('Cache-Control', 'public, max-age=900')
+    res.send(result.data)
+  } catch (error) {
+    console.error('Error fetching radar tile:', error)
+    res.status(500).json({ error: 'Failed to fetch radar tile' })
+  }
+})
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Local dev server running on http://localhost:${PORT}`)
@@ -45,4 +78,5 @@ app.listen(PORT, () => {
   console.log(`  GET /api/weather/current/:lat/:lng`)
   console.log(`  GET /api/weather/hourly/:lat/:lng/:date`)
   console.log(`  GET /api/weather/daily/:lat/:lng/:startDate/:endDate`)
+  console.log(`  GET /api/weather/radar-tile?element=&z=&x=&y=&time=`)
 })
