@@ -25,7 +25,7 @@ export class WeatherApiService {
   }
 
   private getDefaultConfig(): ApiModeConfig {
-    const isProduction = import.meta.env.PROD
+    const isProduction = import.meta.env.MODE === 'production'
     const useRealAPI = import.meta.env.VITE_USE_REAL_API === 'true'
     const disableCache = import.meta.env.VITE_DISABLE_CACHE === 'true'
     const mockScenario = import.meta.env.VITE_MOCK_SCENARIO || 'normal-chicago'

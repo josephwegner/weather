@@ -166,5 +166,89 @@ describe('radarService', () => {
 
       await expect(promise).rejects.toThrow()
     })
+
+    it('loads images in batches of the specified size', async () => {
+      let concurrentLoading = 0
+      let maxConcurrent = 0
+
+      vi.stubGlobal(
+        'Image',
+        class {
+          src = ''
+          onload: (() => void) | null = null
+          onerror: ((err: any) => void) | null = null
+
+          constructor() {
+            concurrentLoading++
+            maxConcurrent = Math.max(maxConcurrent, concurrentLoading)
+            queueMicrotask(() => {
+              concurrentLoading--
+              this.onload?.()
+            })
+          }
+        }
+      )
+
+      const urls = Array.from({ length: 10 }, (_, i) => `/img${i}.webp`)
+      await preloadImages(urls, 3)
+
+      expect(maxConcurrent).toBe(3)
+    })
+
+    it('returns all images in order across batches', async () => {
+      const srcs: string[] = []
+
+      vi.stubGlobal(
+        'Image',
+        class {
+          _src = ''
+          onload: (() => void) | null = null
+          onerror: ((err: any) => void) | null = null
+
+          get src() {
+            return this._src
+          }
+          set src(val: string) {
+            this._src = val
+            srcs.push(val)
+            queueMicrotask(() => this.onload?.())
+          }
+        }
+      )
+
+      const urls = Array.from({ length: 7 }, (_, i) => `/img${i}.webp`)
+      const images = await preloadImages(urls, 3)
+
+      expect(images).toHaveLength(7)
+      expect(srcs).toEqual(urls)
+    })
+
+    it('defaults to batch size of 20', async () => {
+      let maxConcurrent = 0
+      let concurrentLoading = 0
+
+      vi.stubGlobal(
+        'Image',
+        class {
+          src = ''
+          onload: (() => void) | null = null
+          onerror: ((err: any) => void) | null = null
+
+          constructor() {
+            concurrentLoading++
+            maxConcurrent = Math.max(maxConcurrent, concurrentLoading)
+            queueMicrotask(() => {
+              concurrentLoading--
+              this.onload?.()
+            })
+          }
+        }
+      )
+
+      const urls = Array.from({ length: 50 }, (_, i) => `/img${i}.webp`)
+      await preloadImages(urls)
+
+      expect(maxConcurrent).toBe(20)
+    })
   })
 })

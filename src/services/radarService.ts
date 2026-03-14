@@ -76,16 +76,21 @@ export function buildBaseMapGrid(zoom: number, lat: number, lon: number): string
   return urls
 }
 
-export function preloadImages(urls: string[]): Promise<HTMLImageElement[]> {
-  return Promise.all(
-    urls.map(
-      (url) =>
-        new Promise<HTMLImageElement>((resolve, reject) => {
-          const img = new Image()
-          img.onload = () => resolve(img)
-          img.onerror = (err) => reject(err)
-          img.src = url
-        })
-    )
-  )
+export function preloadImage(url: string): Promise<HTMLImageElement> {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = (err) => reject(err)
+    img.src = url
+  })
+}
+
+export async function preloadImages(urls: string[], batchSize = 20): Promise<HTMLImageElement[]> {
+  const results: HTMLImageElement[] = []
+  for (let i = 0; i < urls.length; i += batchSize) {
+    const batch = urls.slice(i, i + batchSize)
+    const images = await Promise.all(batch.map(preloadImage))
+    results.push(...images)
+  }
+  return results
 }
